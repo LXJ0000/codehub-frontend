@@ -1,16 +1,24 @@
 <template>
   <div class="auth-container">
-    <a-card title="登录" class="auth-card">
+    <a-card title="注册" class="auth-card">
       <a-tabs v-model:activeKey="activeKey">
-        <a-tab-pane key="account" tab="账号密码登录">
+        <a-tab-pane key="account" tab="账号注册">
           <a-form
             :model="formState"
-            name="login"
+            name="register"
             @finish="onFinish"
             @finishFailed="onFinishFailed"
             autocomplete="off"
             layout="vertical"
           >
+            <a-form-item
+              name="username"
+              label="用户名"
+              :rules="[{ required: true, message: '请输入用户名!' }]"
+            >
+              <a-input v-model:value="formState.username" />
+            </a-form-item>
+
             <a-form-item
               name="email"
               label="邮箱"
@@ -30,16 +38,27 @@
               <a-input-password v-model:value="formState.password" />
             </a-form-item>
 
+            <a-form-item
+              name="confirmPassword"
+              label="确认密码"
+              :rules="[
+                { required: true, message: '请确认密码!' },
+                { validator: validateConfirmPassword },
+              ]"
+            >
+              <a-input-password v-model:value="formState.confirmPassword" />
+            </a-form-item>
+
             <a-form-item>
-              <a-button type="primary" html-type="submit" :loading="loading" block>登录</a-button>
+              <a-button type="primary" html-type="submit" :loading="loading" block>注册</a-button>
             </a-form-item>
           </a-form>
         </a-tab-pane>
 
-        <a-tab-pane key="phone" tab="手机号登录">
+        <a-tab-pane key="phone" tab="手机号注册">
           <a-form
             :model="phoneFormState"
-            name="phoneLogin"
+            name="phoneRegister"
             @finish="onPhoneFinish"
             @finishFailed="onFinishFailed"
             autocomplete="off"
@@ -70,27 +89,35 @@
               </a-row>
             </a-form-item>
 
+            <a-form-item
+              name="password"
+              label="密码"
+              :rules="[{ required: true, message: '请输入密码!' }]"
+            >
+              <a-input-password v-model:value="phoneFormState.password" />
+            </a-form-item>
+
             <a-form-item>
-              <a-button type="primary" html-type="submit" :loading="loading" block>登录</a-button>
+              <a-button type="primary" html-type="submit" :loading="loading" block>注册</a-button>
             </a-form-item>
           </a-form>
         </a-tab-pane>
       </a-tabs>
 
       <div class="social-login">
-        <p>其他登录方式</p>
+        <p>使用第三方账号注册</p>
         <a-space>
-          <a-button shape="circle" @click="handleWechatLogin">
+          <a-button shape="circle" @click="handleWechatRegister">
             <template #icon><WechatOutlined /></template>
           </a-button>
-          <a-button shape="circle" @click="handleQQLogin">
+          <a-button shape="circle" @click="handleQQRegister">
             <template #icon><QqOutlined /></template>
           </a-button>
         </a-space>
       </div>
 
-      <div class="register-link">
-        <router-link to="/register">还没有账号？立即注册</router-link>
+      <div class="login-link">
+        <router-link to="/login">已有账号？立即登录</router-link>
       </div>
     </a-card>
   </div>
@@ -110,31 +137,40 @@ const activeKey = ref('account')
 const cooldown = ref(0)
 
 const formState = reactive({
+  username: '',
   email: '',
   password: '',
+  confirmPassword: '',
 })
 
 const phoneFormState = reactive({
   phone: '',
   verificationCode: '',
+  password: '',
 })
+
+const validateConfirmPassword = async (_rule, value) => {
+  if (value !== formState.password) {
+    return Promise.reject('两次输入的密码不一致!')
+  }
+  return Promise.resolve()
+}
 
 const onFinish = async () => {
   loading.value = true
   try {
-    await userStore.login(formState)
-    console.log(userStore.user, '\n', userStore.accessToken, '\n', userStore.refreshToken)
-    message.success('登录成功!')
-    router.push('/dashboard')
+    await userStore.register(formState)
+    message.success('注册成功!')
+    router.push('/login')
   } catch (error) {
-    message.error(error.message || '登录失败，请重试!')
+    message.error(error.message || '注册失败，请重试!')
   } finally {
     loading.value = false
   }
 }
 
 const onPhoneFinish = async () => {
-  message.info('手机号登录功能暂未实现')
+  message.info('手机号注册功能暂未实现')
 }
 
 const onFinishFailed = (errorInfo) => {
@@ -146,12 +182,12 @@ const sendVerificationCode = async () => {
   message.info('发送验证码功能暂未实现')
 }
 
-const handleWechatLogin = () => {
-  message.info('微信登录功能暂未实现')
+const handleWechatRegister = () => {
+  message.info('微信注册功能暂未实现')
 }
 
-const handleQQLogin = () => {
-  message.info('QQ登录功能暂未实现')
+const handleQQRegister = () => {
+  message.info('QQ注册功能暂未实现')
 }
 </script>
 
@@ -178,7 +214,7 @@ const handleQQLogin = () => {
     }
   }
 
-  .register-link {
+  .login-link {
     margin-top: 16px;
     text-align: center;
   }

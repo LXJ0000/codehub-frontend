@@ -10,9 +10,8 @@ defineOptions({
       <img class="picture" src="@/assets/404.png" alt="404" />
     </template>
     <template #extra>
-      <!-- replace 重定向到首页 -->
       <router-link replace to="/">
-        <a-button type="primary">返回首页</a-button>
+        <a-button type="primary" @click="$router.push('/')">返回首页</a-button>
       </router-link>
     </template>
   </a-result>

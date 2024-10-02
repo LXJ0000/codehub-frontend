@@ -9,8 +9,8 @@ import router from './router'
 import store from './store'
 
 import 'ant-design-vue/dist/reset.css'
-import '@/styles/main.less'
 import directive from '@/directive'
+import '@/styles/global.css'
 
 const app = createApp(App)
 

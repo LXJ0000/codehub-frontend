@@ -7,6 +7,27 @@ export const constantRoutes = [
     hidden: true, // 侧边栏隐藏该路由
   },
   {
+    component: () => import('@/views/Register/index.vue'),
+    name: 'register',
+    path: '/register',
+    meta: { title: '注册', icon: 'HomeOutlined' },
+    hidden: true, // 侧边栏隐藏该路由
+  },
+  {
+    component: () => import('@/views/Test/index.vue'),
+    name: 'test',
+    path: '/test',
+    meta: { title: '测试', icon: 'HomeOutlined' },
+    hidden: true, // 侧边栏隐藏该路由
+  },
+  {
+    component: () => import('@/views/Post/index.vue'),
+    name: 'post',
+    path: '/post',
+    meta: { title: '动态首页', icon: 'HomeOutlined' },
+    hidden: true, // 侧边栏隐藏该路由
+  },
+  {
     component: () => import('@/views/Layout/index.vue'),
     name: 'dashboard',
     path: '/',

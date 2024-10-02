@@ -1,9 +1,10 @@
 import axios from 'axios'
 import { message } from 'ant-design-vue'
-import { useAccountStore } from '@/store'
+// import { useAccountStore } from '@/store'
 
 // 导入路由
 import router from '@/router'
+import { useUserStore } from '@/store/modules/user'
 
 // 创建 axios 实例
 const http = axios.create({
@@ -15,10 +16,14 @@ const http = axios.create({
 // https://axios-http.com/zh/docs/interceptors
 http.interceptors.request.use(
   (config) => {
-    const { token } = useAccountStore()
-    if (token) {
-      config.headers['Authorization'] = token
+    const { accessToken } = useUserStore()
+    if (accessToken) {
+      config.headers['Authorization'] = `Bearer ${accessToken}`
     }
+    // const { token } = useAccountStore()
+    // if (token) {
+    //   config.headers['Authorization'] = token
+    // }
     return config
   },
   (error) => {
@@ -32,13 +37,14 @@ http.interceptors.response.use(
   (response) => {
     // 提取响应数据
     const data = response.data
+    console.log(data)
     // 如果是下载文件(图片等)，直接返回数据
     if (data instanceof ArrayBuffer) {
       return data
     }
     // code 为非 200 是抛错，可结合自己业务进行修改
     const { code, msg } = data
-    if (code !== 200) {
+    if (code !== 0) {
       message.error(msg)
       return Promise.reject(msg)
     }
