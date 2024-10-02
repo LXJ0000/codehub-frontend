@@ -204,6 +204,7 @@ const newPost = ref({
   title: '',
   content: '',
   status: 'publish',
+  abstract: 'abstract',
 })
 
 const currentUser = ref({
@@ -262,16 +263,24 @@ const fetchPosts = async (page = 1) => {
   try {
     const response = await request('/post/reader', 'GET', { page, size: 10 })
     if (response.code === 0) {
-      posts.value = response.data.post_list.map((post) => ({
-        ...post,
-        liked: false,
-        collected: false,
-        likeCount: 0,
-        collectCount: 0,
-        authorAvatar: 'https://via.placeholder.com/40',
-        authorName: 'Author Name', // You might want to fetch this separately
-        createdAt: new Date(post.CreatedAt * 1000).toLocaleString(),
+      posts.value = response.data.post_list.map((item) => ({
+        id: item.post.post_id,
+        title: item.post.title,
+        content: item.post.content,
+        abstract: item.post.abstract,
+        authorId: item.post.author_id,
+        createdAt: new Date(item.post.created_at * 1000).toLocaleString(),
+        status: item.post.status,
+        liked: item.stat.liked,
+        collected: item.stat.collected,
+        likeCount: item.interaction.like_cnt,
+        collectCount: item.interaction.collect_cnt,
+        readCount: item.interaction.read_cnt,
+        authorAvatar: 'https://via.placeholder.com/40', // 你可能需要从其他地方获取作者头像
+        authorName: 'Author Name', // 你可能需要从其他地方获取作者名称
       }))
+      // 更新分页信息
+      pagination.total = response.data.count
     }
   } catch (error) {
     console.error('Error fetching posts:', error)
@@ -283,7 +292,7 @@ const fetchPosts = async (page = 1) => {
 const likePost = async (post) => {
   try {
     const response = await request('/post/like', 'POST', {
-      post_id: post.post_id,
+      post_id: post.id,
       is_like: !post.liked,
     })
     if (response.code === 0) {
@@ -299,7 +308,7 @@ const likePost = async (post) => {
 const collectPost = async (post) => {
   try {
     const response = await request('/post/collect', 'POST', {
-      post_id: post.post_id,
+      post_id: post.id,
       is_collect: !post.collected,
       collection_id: 0,
     })
@@ -351,7 +360,7 @@ const submitNewPost = async () => {
     if (response.code === 0) {
       message.success('发布成功')
       postModalVisible.value = false
-      newPost.value = { title: '', content: '', status: 'publish' }
+      newPost.value = { title: '', content: '', status: 'publish', abstract: 'abstract' }
       fetchPosts()
     }
   } catch (error) {
