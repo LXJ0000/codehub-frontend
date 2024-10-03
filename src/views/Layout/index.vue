@@ -43,7 +43,7 @@ provide('toggleSider', toggleSider)
 .content {
   padding: 24px;
   min-height: 280px;
-  margin-top: 64px;
+  /* margin-top: 64px; */
 }
 
 @media (max-width: 768px) {

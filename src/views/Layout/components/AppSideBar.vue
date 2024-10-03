@@ -28,7 +28,6 @@ watch(
 <template>
   <a-layout-sider
     v-model:collapsed="isSiderCollapsed"
-    :trigger="null"
     collapsible
     class="sidebar"
     :theme="isDarkMode ? 'dark' : 'light'"

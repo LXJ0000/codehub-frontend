@@ -176,18 +176,6 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import {
-  LikeOutlined,
-  LikeFilled,
-  StarOutlined,
-  StarFilled,
-  ShareAltOutlined,
-  BellOutlined,
-  MessageOutlined,
-  SmileOutlined,
-  PictureOutlined,
-  VideoCameraOutlined,
-} from '@ant-design/icons-vue'
 import { request } from '@/utils/request'
 import { useUserStore } from '@/store/modules/user'
 

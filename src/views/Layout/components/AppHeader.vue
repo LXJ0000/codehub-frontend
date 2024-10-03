@@ -1,16 +1,6 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { computed, inject, ref } from 'vue'
-import {
-  UserOutlined,
-  SettingOutlined,
-  LogoutOutlined,
-  FullscreenOutlined,
-  FullscreenExitOutlined,
-  BulbOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-} from '@ant-design/icons-vue'
 
 const route = useRoute()
 const isDarkMode = inject('isDarkMode', ref(false))
