@@ -38,7 +38,7 @@ export const constantRoutes = [
     component: () => import('@/views/Layout/index.vue'),
     name: 'dashboard',
     path: '/',
-    redirect: '/dashboard',
+    // redirect: '/login',
     meta: { title: '工作台', icon: 'HomeOutlined', order: 0 },
     children: [
       {
