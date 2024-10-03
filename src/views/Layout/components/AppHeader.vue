@@ -1,12 +1,17 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { computed, inject, ref } from 'vue'
+import { useUserStore } from '@/store/modules/user'
+import { message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
 
 const route = useRoute()
 const isDarkMode = inject('isDarkMode', ref(false))
 const toggleDarkMode = inject('toggleDarkMode', () => {})
 const isSiderCollapsed = inject('isSiderCollapsed', ref(false))
 const toggleSider = inject('toggleSider', () => {})
+const userStore = useUserStore()
+const router = useRouter()
 
 const breadcrumb = computed(() => {
   return route.matched.map((item) => ({
@@ -29,9 +34,14 @@ const toggleFullscreen = () => {
   }
 }
 
-const handleLogout = () => {
-  // 实现登出逻辑
-  console.log('User logged out')
+const handleLogout = async () => {
+  try {
+    await userStore.logout()
+    message.success('退出登录成功')
+    router.push('/login')
+  } catch (error) {
+    message.error(error.message || '退出登录失败，请重试')
+  }
 }
 </script>
 

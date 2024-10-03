@@ -49,20 +49,21 @@ export const useUserStore = defineStore(
     }
 
     const logout = async () => {
+      console.log(accessToken.value)
       try {
         const response = await axios.post(
           `${API_BASE_URL}/logout`,
           {},
           {
             headers: {
-              Authorization: `Bearer ${this.accessToken}`,
+              Authorization: `Bearer ${accessToken.value}`,
             },
           },
         )
         if (response.data.code === 0) {
-          this.user = null
-          this.accessToken = null
-          this.refreshToken = null
+          user.value = null
+          accessToken.value = null
+          refreshToken.value = null
           return true
         } else {
           throw new Error(response.data.error || '退出登录失败')
@@ -77,17 +78,17 @@ export const useUserStore = defineStore(
         const response = await axios.post(
           `${API_BASE_URL}/refresh`,
           {
-            refresh_token: this.refreshToken,
+            refresh_token: refreshToken.value,
           },
           {
             headers: {
-              Authorization: `Bearer ${this.accessToken}`,
+              Authorization: `Bearer ${accessToken.value}`,
             },
           },
         )
         if (response.data.code === 0) {
-          this.accessToken = response.data.data.access_token
-          this.refreshToken = response.data.data.refresh_token
+          accessToken.value = response.data.data.access_token
+          refreshToken.value = response.data.data.refresh_token
           return true
         } else {
           throw new Error(response.data.error || '刷新token失败')
