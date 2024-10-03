@@ -7,6 +7,7 @@ import Icons from './components/Icons'
 
 import router from './router'
 import store from './store'
+import './permission' // permission control
 
 import 'ant-design-vue/dist/reset.css'
 import directive from '@/directive'

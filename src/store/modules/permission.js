@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { asyncRoutes } from '@/router'
+import { asyncRoutes } from '@/router/asyncRoutes'
 import { getRouter } from '@/services/login'
 
 export const usePermissionStore = defineStore(
