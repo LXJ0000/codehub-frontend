@@ -1,5 +1,12 @@
 export const constantRoutes = [
   {
+    component: () => import('@/views/QQ/index.vue'),
+    name: 'qq',
+    path: '/qq',
+    meta: { title: 'QQ', icon: 'HomeOutlined' },
+    hidden: true, // 侧边栏隐藏该路由
+  },
+  {
     component: () => import('@/views/Login/index.vue'),
     name: 'login',
     path: '/login',

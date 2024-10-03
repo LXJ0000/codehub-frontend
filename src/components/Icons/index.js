@@ -31,6 +31,10 @@ import {
   BulbOutlined,
   WechatOutlined,
   QqOutlined,
+  FileImageOutlined,
+  MoreOutlined,
+  PhoneOutlined,
+  DesktopOutlined,
 } from '@ant-design/icons-vue'
 
 // 以上图标都需要全局注册
@@ -66,6 +70,10 @@ const icons = [
   BulbOutlined,
   WechatOutlined,
   QqOutlined,
+  FileImageOutlined,
+  MoreOutlined,
+  PhoneOutlined,
+  DesktopOutlined,
 ]
 
 // app.use({ install(){ } })

@@ -100,7 +100,7 @@ body {
 }
 
 .ant-layout-sider-trigger {
-  background-color: var(--primary-200) !important;
+  background-color: var(--primary-100) !important;
 }
 
 @media (max-width: 768px) {

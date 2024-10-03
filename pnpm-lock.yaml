@@ -4314,6 +4314,10 @@ snapshots:
       is-plain-object: 3.0.1
       vue: 3.5.8
 
+  vue3-emoji@2.1.8(vue@3.5.8):
+    dependencies:
+      vue: 3.5.8
+
   vue@3.5.8:
     dependencies:
       '@vue/compiler-dom': 3.5.8
