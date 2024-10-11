@@ -1,7 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { message } from 'ant-design-vue'
+import { useMessageStore } from '@/store/modules/message'
 
+const messageStore = useMessageStore()
 const searchQuery = ref('')
 const selectedChat = ref(null)
 const showUserProfile = ref(false)
@@ -10,48 +12,7 @@ const showSettings = ref(false)
 const messageInput = ref('')
 const showMediaUpload = ref(false)
 
-const chats = ref([
-  {
-    id: 1,
-    name: '晴宝大于阳晴月亮',
-    avatar: '/placeholder.svg?height=40&width=40',
-    lastMessage: '可能在放假',
-    time: '2024/06/10',
-    unread: 0,
-  },
-  {
-    id: 2,
-    name: '代码源算法交流群',
-    avatar: '/placeholder.svg?height=40&width=40',
-    lastMessage: '...: 有静态单射',
-    time: '2024/09/02',
-    unread: 0,
-  },
-  {
-    id: 3,
-    name: 'TP-Link2025未来院',
-    avatar: '/placeholder.svg?height=40&width=40',
-    lastMessage: 'Jenny: SHEIN状况, 20w+...',
-    time: '2024/08/28',
-    unread: 0,
-  },
-  {
-    id: 4,
-    name: '🍔2024蓝桥杯',
-    avatar: '/placeholder.svg?height=40&width=40',
-    lastMessage: '郑帆帆-20230502044: 不...',
-    time: '2024/08/26',
-    unread: 0,
-  },
-  {
-    id: 5,
-    name: '好运连连',
-    avatar: '/placeholder.svg?height=40&width=40',
-    lastMessage: '啾咪',
-    time: '2024/06/09',
-    unread: 0,
-  },
-])
+const chats = messageStore.userList
 
 const messages = ref([
   {
@@ -85,9 +46,7 @@ const messages = ref([
 ])
 
 const filteredChats = computed(() => {
-  return chats.value.filter((chat) =>
-    chat.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
-  )
+  return chats.filter((chat) => chat.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
 })
 
 const selectChat = (chat) => {
