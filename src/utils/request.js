@@ -37,7 +37,7 @@ http.interceptors.response.use(
   (response) => {
     // 提取响应数据
     const data = response.data
-    console.log(data)
+    // console.log(data)
     // 如果是下载文件(图片等)，直接返回数据
     if (data instanceof ArrayBuffer) {
       return data
@@ -55,10 +55,22 @@ http.interceptors.response.use(
     const response = error.response
     const status = response && response.status
     // 和后端约定的3种状态码会跳转登录，可结合自己业务进行修改
-    if ([400, 401, 403].includes(status)) {
-      if (status === 400) {
-        message.warning('权限不足')
-      } else if (status === 401) {
+    // if ([400, 401, 403].includes(status)) {
+    //   if (status === 400) {
+    //     message.warning('权限不足')
+    //   } else if (status === 401) {
+    //     message.warning('登录状态过期')
+    //   }
+    //   // 清理用户信息 token，重置权限路由等，可结合自己业务进行修改
+    //   // TODO:...
+    //   // 跳转登录页
+    //   router.push('/login')
+    //   return Promise.reject(error)
+    // } else {
+    //   return Promise.reject(error)
+    // }
+    if ([401].includes(status)) {
+      if (status === 401) {
         message.warning('登录状态过期')
       }
       // 清理用户信息 token，重置权限路由等，可结合自己业务进行修改

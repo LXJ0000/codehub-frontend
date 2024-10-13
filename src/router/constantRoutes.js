@@ -1,5 +1,23 @@
 export const constantRoutes = [
   {
+    path: '/user/:id',
+    name: 'UserProfile',
+    component: () => import('@/views/UserProfile/index.vue'),
+    props: true,
+  },
+  {
+    path: '/user/:id/followers',
+    name: 'UserFollowers',
+    component: () => import('@/views/UserFollowers/index.vue'),
+    props: true,
+  },
+  {
+    path: '/user/:id/following',
+    name: 'UserFollowing',
+    component: () => import('@/views/UserFollowing/index.vue'),
+    props: true,
+  },
+  {
     component: () => import('@/views/QQ/index.vue'),
     name: 'qq',
     path: '/qq',

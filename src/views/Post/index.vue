@@ -41,20 +41,20 @@
 
     <div class="main-content">
       <aside class="user-profile module">
-        <router-link to="/user/profile" class="user-info">
+        <router-link :to="`/user/${currentUser.id}`" class="user-info">
           <a-avatar :size="64" :src="currentUser.avatar" />
           <h2>{{ currentUser.name }}</h2>
         </router-link>
         <div class="user-stats">
-          <router-link to="/user/following" class="stat-item">
+          <router-link :to="`/user/${currentUser.id}/following`" class="stat-item">
             <div class="stat-value">{{ currentUser.followingCount }}</div>
             <div class="stat-label">关注</div>
           </router-link>
-          <router-link to="/user/followers" class="stat-item">
+          <router-link :to="`/user/${currentUser.id}/followers`" class="stat-item">
             <div class="stat-value">{{ currentUser.followerCount }}</div>
             <div class="stat-label">粉丝</div>
           </router-link>
-          <router-link to="/user/posts" class="stat-item">
+          <router-link :to="`/user/${currentUser.id}`" class="stat-item">
             <div class="stat-value">{{ currentUser.postCount }}</div>
             <div class="stat-label">动态</div>
           </router-link>
@@ -153,7 +153,7 @@
       </aside>
     </div>
 
-    <a-modal v-model:visible="postModalVisible" title="发布新内容" @ok="submitNewPost">
+    <a-modal v-model:open="postModalVisible" title="发布新内容" @ok="submitNewPost">
       <a-form :model="newPost" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="标题">
           <a-input v-model:value="newPost.title" />
@@ -180,6 +180,7 @@ import { request } from '@/utils/request'
 import { useUserStore } from '@/store/modules/user'
 
 const userStore = useUserStore()
+console.log(userStore)
 
 const router = useRouter()
 const searchQuery = ref('')
@@ -196,6 +197,7 @@ const newPost = ref({
 })
 
 const currentUser = ref({
+  id: '',
   avatar: '',
   name: '',
   followingCount: 0,
@@ -227,21 +229,20 @@ onMounted(() => {
 
 const fetchUserInfo = async () => {
   try {
-    const response = await request('/relation/stat', 'GET')
+    const response = await request('/user/profile', 'GET')
     if (response.code === 0) {
-      currentUser.value.followingCount = response.data.Followee
-      currentUser.value.followerCount = response.data.Follower
+      currentUser.value.followingCount = response.data.profile.relation_stat.followee
+      currentUser.value.followerCount = response.data.profile.relation_stat.follower
+      currentUser.value.postCount = response.data.profile.post_cnt
+      currentUser.value.name = response.data.profile.nick_name
+        ? response.data.profile.nick_name
+        : response.data.profile.user_name
+      currentUser.value.avatar = response.data.profile.avatar
+      currentUser.value.birthday = response.data.profile.birthday
+      currentUser.value.about_me = response.data.profile.about_me
+      currentUser.value.email = response.data.profile.email
+      currentUser.value.id = response.data.profile.relation_stat.user_id
     }
-    // /post/writer
-    const data = await request('/post/writer', 'GET')
-    if (data.code === 0) {
-      currentUser.value.postCount = data.data.count
-    }
-    currentUser.value.name = userStore.user.user_name
-    if (userStore.user.nick_name !== '') {
-      currentUser.value.name = userStore.user.nick_name
-    }
-    currentUser.value.avatar = userStore.user.avatar
   } catch (error) {
     console.error('Error fetching user info:', error)
   }
@@ -270,7 +271,7 @@ const fetchPosts = async (page = 1) => {
           : 'https://avatars.githubusercontent.com/u/98313822?u=b615bc340136ea9f06cec4e05f0aee6b00118f82&v=4', // 你可能需要从其他地方获取作者头像
         authorName: item.post.author.nick_name
           ? item.post.author.nick_name
-          : item.post.author.user_name, // 你可能需要从其他地方获取作者名称
+          : item.post.author.user_name,
       }))
       // 更新分页信息
       pagination.total = response.data.count
