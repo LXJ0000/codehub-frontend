@@ -2,7 +2,7 @@ import router from '@/router'
 // import { usePermissionStore } from './store/modules/permission'
 import { useUserStore } from './store/modules/user'
 
-const whiteList = ['/login', '/404']
+const whiteList = ['/login', '/404', '/register']
 router.beforeEach(async (to, from, next) => {
   // console.log(usePermissionStore)
   const accessToken = useUserStore().accessToken
