@@ -196,11 +196,11 @@ const newPost = ref({
 })
 
 const currentUser = ref({
-  avatar: 'https://via.placeholder.com/64',
-  name: '梦奴Y',
+  avatar: '',
+  name: '',
   followingCount: 0,
   followerCount: 0,
-  postCount: 35,
+  postCount: 0,
 })
 
 const navItems = ['首页', '番剧', '直播', '游戏中心', '会员购', '漫画', '赛事']
@@ -241,6 +241,7 @@ const fetchUserInfo = async () => {
     if (userStore.user.nick_name !== '') {
       currentUser.value.name = userStore.user.nick_name
     }
+    currentUser.value.avatar = userStore.user.avatar
   } catch (error) {
     console.error('Error fetching user info:', error)
   }
@@ -264,8 +265,12 @@ const fetchPosts = async (page = 1) => {
         likeCount: item.interaction.like_cnt,
         collectCount: item.interaction.collect_cnt,
         readCount: item.interaction.read_cnt,
-        authorAvatar: 'https://via.placeholder.com/40', // 你可能需要从其他地方获取作者头像
-        authorName: 'Author Name', // 你可能需要从其他地方获取作者名称
+        authorAvatar: item.post.author.avatar
+          ? item.post.author.avatar
+          : 'https://avatars.githubusercontent.com/u/98313822?u=b615bc340136ea9f06cec4e05f0aee6b00118f82&v=4', // 你可能需要从其他地方获取作者头像
+        authorName: item.post.author.nick_name
+          ? item.post.author.nick_name
+          : item.post.author.user_name, // 你可能需要从其他地方获取作者名称
       }))
       // 更新分页信息
       pagination.total = response.data.count
