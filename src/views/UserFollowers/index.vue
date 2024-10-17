@@ -1,6 +1,6 @@
 <template>
   <div class="user-followers-page">
-    <h1>我的的粉丝</h1>
+    <h1>我的粉丝</h1>
     <a-list
       :dataSource="followers"
       :loading="loading"
@@ -76,7 +76,7 @@ const fetchFollowers = async () => {
     if (response.code === 0) {
       followers.value = response.data.user_list.map((follower) => ({
         ...follower,
-        isFollowing: false, // You might want to fetch this information from the backend
+        isFollowing: false, // You might want to fetch this information from the backend TODO
       }))
       pagination.total = response.data.count
     }
@@ -90,7 +90,7 @@ const fetchFollowers = async () => {
 
 const toggleFollow = async (follower) => {
   try {
-    const endpoint = follower.isFollowing ? '/relation/cancel_follow' : '/api/relation/follow'
+    const endpoint = follower.isFollowing ? '/relation/cancel_follow' : '/relation/follow'
     const response = await request(endpoint, 'POST', { followee: follower.user_id })
     if (response.code === 0) {
       follower.isFollowing = !follower.isFollowing
