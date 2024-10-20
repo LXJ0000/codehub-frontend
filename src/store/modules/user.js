@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { ref } from 'vue'
+import { logoutApi } from '@/services/login'
+import router from '@/router'
+import { loginSms } from '@/services/login'
 
 const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL
 
@@ -29,7 +32,22 @@ export const useUserStore = defineStore(
         throw error
       }
     }
-
+    const phoneLogin = async (data) => {
+      try {
+        const response = await loginSms(data)
+        if (response.code === 0) {
+          user.value = response.data.user_detail
+          accessToken.value = response.data.access_token
+          refreshToken.value = response.data.refresh_token
+          return true
+        } else {
+          throw new Error(response.error || '登录失败')
+        }
+      } catch (error) {
+        console.error('登录失败:', error)
+        throw error
+      }
+    }
     const register = async (data) => {
       try {
         const response = await axios.post(`${API_BASE_URL}/signup`, {
@@ -51,19 +69,12 @@ export const useUserStore = defineStore(
     const logout = async () => {
       console.log(accessToken.value)
       try {
-        const response = await axios.post(
-          `${API_BASE_URL}/logout`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken.value}`,
-            },
-          },
-        )
-        if (response.data.code === 0) {
+        const response = await logoutApi()
+        if (response.code === 0) {
           user.value = null
           accessToken.value = null
           refreshToken.value = null
+          router.push('/login')
           return true
         } else {
           throw new Error(response.data.error || '退出登录失败')
@@ -107,6 +118,7 @@ export const useUserStore = defineStore(
       register,
       logout,
       refreshTokenFunc,
+      phoneLogin,
     }
   },
   {

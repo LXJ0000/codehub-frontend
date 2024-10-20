@@ -54,17 +54,17 @@
             </a-form-item>
 
             <a-form-item
-              name="verificationCode"
+              name="code"
               label="验证码"
               :rules="[{ required: true, message: '请输入验证码!' }]"
             >
               <a-row :gutter="8">
                 <a-col :span="16">
-                  <a-input v-model:value="phoneFormState.verificationCode" />
+                  <a-input v-model:value="phoneFormState.code" />
                 </a-col>
                 <a-col :span="8">
                   <a-button @click="sendVerificationCode" :disabled="cooldown > 0">
-                    {{ cooldown > 0 ? `${cooldown}s` : '获取验证码' }}
+                    {{ cooldown > 0 ? `${cooldown}s后重新获取` : '获取验证码' }}
                   </a-button>
                 </a-col>
               </a-row>
@@ -101,7 +101,7 @@ import { reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import { useUserStore } from '@/store/modules/user'
 import { useRouter } from 'vue-router'
-
+import { sendCode } from '@/services/login'
 const userStore = useUserStore()
 const router = useRouter()
 const loading = ref(false)
@@ -115,7 +115,7 @@ const formState = reactive({
 
 const phoneFormState = reactive({
   phone: '',
-  verificationCode: '',
+  code: '',
 })
 
 const onFinish = async () => {
@@ -133,7 +133,14 @@ const onFinish = async () => {
 }
 
 const onPhoneFinish = async () => {
-  message.info('手机号登录功能暂未实现')
+  console.log(1)
+  try {
+    await userStore.phoneLogin(phoneFormState)
+    message.success('登录成功!')
+    router.push('/dashboard')
+  } catch (error) {
+    message.error(error)
+  }
 }
 
 const onFinishFailed = (errorInfo) => {
@@ -142,7 +149,22 @@ const onFinishFailed = (errorInfo) => {
 }
 
 const sendVerificationCode = async () => {
-  message.info('发送验证码功能暂未实现')
+  cooldown.value = 60
+  try {
+    const data = await sendCode({ phone: phoneFormState.phone })
+    let timer = window.setInterval(() => {
+      cooldown.value--
+      if (cooldown.value < 0) {
+        cooldown.value = 0
+        window.clearInterval(timer)
+      }
+    }, 1000)
+    if (data.code === 0) {
+      message.success('验证码发送成功!')
+    }
+  } catch (error) {
+    message.error(error)
+  }
 }
 
 const handleWechatLogin = () => {

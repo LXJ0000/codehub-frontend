@@ -1,17 +1,17 @@
 import { request } from '@/utils/request'
 
 export const login = (data) => {
-  return request({
-    url: '/login',
-    method: 'post',
-    data,
-  })
+  return request('/login', 'POST', data)
 }
 
-export const getRouter = (data) => {
-  return request({
-    url: location.origin + '/api/getPermission',
-    method: 'get',
-    data,
-  })
+export const logoutApi = () => {
+  return request('/logout', 'POST')
+}
+
+export const sendCode = (data) => {
+  return request('/send_sms_code', 'POST', data)
+}
+
+export const loginSms = (data) => {
+  return request('/login/sms', 'POST', data)
 }
