@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { message } from 'ant-design-vue'
-import { useMessageStore } from '@/store/modules/message'
+import { useMessageStore } from '@/store/modules/Message'
 
 const messageStore = useMessageStore()
 const searchQuery = ref('')

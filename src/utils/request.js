@@ -69,6 +69,7 @@ http.interceptors.response.use(
     // } else {
     //   return Promise.reject(error)
     // }
+    console.log(1)
     if ([401].includes(status)) {
       if (status === 401) {
         message.warning('登录状态过期')
@@ -85,12 +86,12 @@ http.interceptors.response.use(
 )
 
 // 封装请求
-const request = (url, method, data, type) => {
+const request = (data) => {
   return http({
-    url,
-    method,
-    [method.toUpperCase() === 'GET' ? 'params' : 'data']: data,
-    responseType: type,
+    url: data.url,
+    method: data.method,
+    [data.method.toUpperCase() === 'GET' ? 'params' : 'data']: data,
+    responseType: data.type,
   })
 }
 
