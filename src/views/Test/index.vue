@@ -1,54 +1,49 @@
-<script setup>
-import { ref, provide } from 'vue'
-import AppSideBar from './components/AppSideBar.vue'
-import AppHeader from './components/AppHeader.vue'
-import AppFooter from './components/AppFooter.vue'
-
-const isDarkMode = ref(false)
-const isSiderCollapsed = ref(false)
-
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value
-  document.body.classList.toggle('dark-mode', isDarkMode.value)
-}
-
-const toggleSider = () => {
-  isSiderCollapsed.value = !isSiderCollapsed.value
-}
-
-provide('isDarkMode', isDarkMode)
-provide('toggleDarkMode', toggleDarkMode)
-provide('isSiderCollapsed', isSiderCollapsed)
-provide('toggleSider', toggleSider)
-</script>
-
 <template>
-  <a-layout class="layout">
-    <AppSideBar />
-    <a-layout :style="{ marginLeft: isSiderCollapsed ? '0' : '200px' }">
-      <AppHeader />
-      <a-layout-content class="content">
-        <router-view />
-      </a-layout-content>
-      <AppFooter />
-    </a-layout>
-  </a-layout>
+  <button v-on:click="login">xxx</button>
 </template>
 
-<style scoped>
-.layout {
-  min-height: 100vh;
-}
+<script setup>
+console.log('Test')
+import { getSDK } from '@openim/wasm-client-sdk'
 
-.content {
-  padding: 24px;
-  min-height: 280px;
-  margin-top: 64px;
-}
+const IMSDK = getSDK()
 
-@media (max-width: 768px) {
-  .content {
-    margin-top: 112px;
-  }
+const config = {
+  userID: '7253472263', // IM 用户 userID
+  token: '123123123', // IM 用户令牌
+  platformID: 345, // 当前登录平台号
+  apiAddr: 'http://localhost:10002', // IM api 地址，一般为`http://your-server-ip:10002`或`https://your-server-ip/api
+  wsAddr: 'ws://localhost:10001', // IM ws 地址，一般为`ws://your-server-ip:10001`(@openim/wasm-client-sdk)或`ws://your-server-ip:10003`(open-im-sdk)
 }
-</style>
+const login = () => {
+  IMSDK.getLoginStatus()
+    .then(({ data }) => {
+      // data: 登录状态LoginStatus
+      console.log('data', data)
+      if (data == 3) {
+        IMSDK.logout()
+          .then(() => {
+            // 退出登录成功
+            console.log('退出登录成功 = ====== ====== = == ')
+          })
+          .catch(({ errCode, errMsg }) => {
+            // 调用失败
+            console.log('退出登录失败', errCode, errMsg)
+          })
+      }
+    })
+    .catch(({ errCode, errMsg }) => {
+      // 调用失败
+      console.log(errCode, errMsg)
+    })
+  IMSDK.login(config)
+    .then(() => {
+      console.log('登录成功===================================================')
+    })
+    .catch(({ errCode, errMsg }) => {
+      console.log(errCode, errMsg)
+    })
+}
+</script>
+
+<style></style>

@@ -3,19 +3,19 @@ export const constantRoutes = [
     path: '/user/:id',
     name: 'UserProfile',
     component: () => import('@/views/UserProfile/index.vue'),
-    props: true,
+    meta: { title: '用户信息', icon: 'HomeOutlined', hidden: true },
   },
   {
     path: '/user/:id/followers',
     name: 'UserFollowers',
     component: () => import('@/views/UserFollowers/index.vue'),
-    props: true,
+    meta: { title: '粉丝列表', icon: 'HomeOutlined', hidden: true },
   },
   {
     path: '/user/:id/following',
     name: 'UserFollowing',
     component: () => import('@/views/UserFollowing/index.vue'),
-    props: true,
+    meta: { title: '关注列表', icon: 'HomeOutlined', hidden: true },
   },
   {
     component: () => import('@/views/QQ/index.vue'),
