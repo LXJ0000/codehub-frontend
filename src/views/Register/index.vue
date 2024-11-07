@@ -55,7 +55,7 @@
           </a-form>
         </a-tab-pane>
 
-        <a-tab-pane key="phone" tab="手机号注册">
+        <!-- <a-tab-pane key="phone" tab="手机号注册">
           <a-form
             :model="phoneFormState"
             name="phoneRegister"
@@ -101,7 +101,7 @@
               <a-button type="primary" html-type="submit" :loading="loading" block>注册</a-button>
             </a-form-item>
           </a-form>
-        </a-tab-pane>
+        </a-tab-pane> -->
       </a-tabs>
 
       <div class="social-login">
@@ -133,7 +133,7 @@ const userStore = useUserStore()
 const router = useRouter()
 const loading = ref(false)
 const activeKey = ref('account')
-const cooldown = ref(0)
+// const cooldown = ref(0)
 
 const formState = reactive({
   username: '',
@@ -142,11 +142,11 @@ const formState = reactive({
   confirmPassword: '',
 })
 
-const phoneFormState = reactive({
-  phone: '',
-  verificationCode: '',
-  password: '',
-})
+// const phoneFormState = reactive({
+//   phone: '',
+//   verificationCode: '',
+//   password: '',
+// })
 
 const validateConfirmPassword = async (_rule, value) => {
   if (value !== formState.password) {
@@ -168,18 +168,18 @@ const onFinish = async () => {
   }
 }
 
-const onPhoneFinish = async () => {
-  message.info('手机号注册功能暂未实现')
-}
+// const onPhoneFinish = async () => {
+//   message.info('手机号注册功能暂未实现')
+// }
 
 const onFinishFailed = (errorInfo) => {
   console.log('Failed:', errorInfo)
   message.error('请检查表单信息并重试!')
 }
 
-const sendVerificationCode = async () => {
-  message.info('发送验证码功能暂未实现')
-}
+// const sendVerificationCode = async () => {
+//   message.info('发送验证码功能暂未实现')
+// }
 
 const handleWechatRegister = () => {
   message.info('微信注册功能暂未实现')

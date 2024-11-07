@@ -2,7 +2,7 @@
   <div class="auth-container">
     <a-card title="登录" class="auth-card">
       <a-tabs v-model:activeKey="activeKey">
-        <a-tab-pane key="account" tab="账号密码登录">
+        <a-tab-pane key="account" tab="邮箱">
           <a-form
             :model="formState"
             name="login"
@@ -13,58 +13,58 @@
           >
             <a-form-item
               name="email"
-              label="邮箱"
               :rules="[
                 { required: true, message: '请输入邮箱!' },
                 { type: 'email', message: '请输入有效的邮箱地址!' },
               ]"
             >
-              <a-input v-model:value="formState.email" />
+              <a-input v-model:value="formState.email" placeholder="邮箱" />
             </a-form-item>
 
-            <a-form-item
-              name="password"
-              label="密码"
-              :rules="[{ required: true, message: '请输入密码!' }]"
-            >
-              <a-input-password v-model:value="formState.password" />
+            <a-form-item name="password" :rules="[{ required: true, message: '请输入密码!' }]">
+              <a-input-password v-model:value="formState.password" placeholder="密码" />
             </a-form-item>
 
             <a-form-item>
               <a-button type="primary" html-type="submit" :loading="loading" block>登录</a-button>
             </a-form-item>
+
+            <a-form-item>
+              <div class="login-options">
+                <a class="forgot-password" @click="handleForgotPassword">忘记密码</a>
+              </div>
+            </a-form-item>
           </a-form>
         </a-tab-pane>
 
-        <a-tab-pane key="phone" tab="手机号登录">
+        <a-tab-pane key="phone" tab="手机号">
           <a-form
             :model="phoneFormState"
             name="phoneLogin"
             @finish="onPhoneFinish"
             @finishFailed="onFinishFailed"
             autocomplete="off"
-            layout="vertical"
           >
-            <a-form-item
-              name="phone"
-              label="手机号"
-              :rules="[{ required: true, message: '请输入手机号!' }]"
-            >
-              <a-input v-model:value="phoneFormState.phone" />
+            <a-form-item name="phone" :rules="[{ required: true, message: '请输入手机号!' }]">
+              <a-input v-model:value="phoneFormState.phone" placeholder="手机号" />
             </a-form-item>
 
             <a-form-item
-              name="code"
-              label="验证码"
-              :rules="[{ required: true, message: '请输入验证码!' }]"
+              v-if="loginMethod === 'password'"
+              name="password"
+              :rules="[{ required: true, message: '请输入密码!' }]"
             >
+              <a-input-password v-model:value="phoneFormState.password" placeholder="密码" />
+            </a-form-item>
+
+            <a-form-item v-else name="code">
               <a-row :gutter="8">
                 <a-col :span="16">
-                  <a-input v-model:value="phoneFormState.code" />
+                  <a-input v-model:value="phoneFormState.code" placeholder="验证码" />
                 </a-col>
                 <a-col :span="8">
-                  <a-button @click="sendVerificationCode" :disabled="cooldown > 0">
-                    {{ cooldown > 0 ? `${cooldown}s后重新获取` : '获取验证码' }}
+                  <a-button @click="sendVerificationCode" :disabled="cooldown > 0" block>
+                    {{ cooldown > 0 ? `${cooldown}s` : '发送验证码' }}
                   </a-button>
                 </a-col>
               </a-row>
@@ -72,6 +72,15 @@
 
             <a-form-item>
               <a-button type="primary" html-type="submit" :loading="loading" block>登录</a-button>
+            </a-form-item>
+
+            <a-form-item>
+              <div class="login-options">
+                <a class="forgot-password" @click="handleForgotPassword">忘记密码</a>
+                <a class="toggle-login-method" @click="toggleLoginMethod">
+                  {{ loginMethod === 'password' ? '验证码登录' : '密码登录' }}
+                </a>
+              </div>
             </a-form-item>
           </a-form>
         </a-tab-pane>
@@ -102,11 +111,14 @@ import { message } from 'ant-design-vue'
 import { useUserStore } from '@/store/modules/user'
 import { useRouter } from 'vue-router'
 import { sendCode } from '@/services/login'
+import { WechatOutlined, QqOutlined } from '@ant-design/icons-vue'
+
 const userStore = useUserStore()
 const router = useRouter()
 const loading = ref(false)
 const activeKey = ref('account')
 const cooldown = ref(0)
+const loginMethod = ref('password') // 'code' for verification code, 'password' for password login
 
 const formState = reactive({
   email: '',
@@ -116,13 +128,33 @@ const formState = reactive({
 const phoneFormState = reactive({
   phone: '',
   code: '',
+  password: '',
 })
 
 const onFinish = async () => {
   loading.value = true
   try {
     await userStore.login(formState)
-    console.log(userStore.user, '\n', userStore.accessToken, '\n', userStore.refreshToken)
+    message.success('登录成功!')
+    router.push('/dashboard')
+  } catch (error) {
+    message.error('用户名或密码有误')
+  } finally {
+    loading.value = false
+  }
+}
+
+const onPhoneFinish = async () => {
+  loading.value = true
+  try {
+    if (loginMethod.value === 'code') {
+      await userStore.phoneLogin(phoneFormState)
+    } else {
+      await userStore.phonePasswordLogin({
+        phone: phoneFormState.phone,
+        password: phoneFormState.password,
+      })
+    }
     message.success('登录成功!')
     router.push('/dashboard')
   } catch (error) {
@@ -132,39 +164,40 @@ const onFinish = async () => {
   }
 }
 
-const onPhoneFinish = async () => {
-  console.log(1)
-  try {
-    await userStore.phoneLogin(phoneFormState)
-    message.success('登录成功!')
-    router.push('/dashboard')
-  } catch (error) {
-    message.error(error)
-  }
-}
-
 const onFinishFailed = (errorInfo) => {
   console.log('Failed:', errorInfo)
   message.error('请检查表单信息并重试!')
 }
 
 const sendVerificationCode = async () => {
+  if (!phoneFormState.phone) {
+    message.error('请先输入手机号!')
+    return
+  }
   cooldown.value = 60
   try {
     const data = await sendCode({ phone: phoneFormState.phone })
-    let timer = window.setInterval(() => {
+    let timer = setInterval(() => {
       cooldown.value--
-      if (cooldown.value < 0) {
-        cooldown.value = 0
-        window.clearInterval(timer)
+      if (cooldown.value <= 0) {
+        clearInterval(timer)
       }
     }, 1000)
     if (data.code === 0) {
       message.success('验证码发送成功!')
     }
   } catch (error) {
-    message.error(error)
+    message.error(error.message || '发送验证码失败，请重试!')
+    cooldown.value = 0
   }
+}
+
+const toggleLoginMethod = () => {
+  loginMethod.value = loginMethod.value === 'code' ? 'password' : 'code'
+}
+
+const handleForgotPassword = () => {
+  message.info('忘记密码功能暂未实现')
 }
 
 const handleWechatLogin = () => {
@@ -202,6 +235,21 @@ const handleQQLogin = () => {
   .register-link {
     margin-top: 16px;
     text-align: center;
+  }
+
+  .login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+
+    .forgot-password {
+      color: rgba(0, 0, 0, 0.45);
+    }
+
+    .toggle-login-method {
+      color: #1890ff;
+    }
   }
 }
 </style>
