@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
+import { IMSDK } from '@/utils/imCommon'
+import { useUserStore } from './user'
 
+const userStore = useUserStore()
 export const useMessageStore = defineStore(
   'message',
   () => {
@@ -55,9 +58,27 @@ export const useMessageStore = defineStore(
         unread: 0,
       },
     ])
+    const conversationList = ref([])
     /* 聊天记录 */
     const chatMessageList = ref([])
 
+    const getConversationList = async (isScrollLoad = false) => {
+      try {
+        await userStore.tryLogin()
+        const { data } = await IMSDK.getConversationListSplit({
+          offset: isScrollLoad ? this.conversationList.length : 0,
+          count: 20,
+        })
+        console.log('log_getConversationListSplit', data)
+        const cves = data
+        conversationList.value = [...(isScrollLoad ? this.conversationList : []), ...cves]
+        console.log(conversationList.value, '好友列表')
+        return cves.length === 20
+      } catch (error) {
+        console.error(error)
+        return false
+      }
+    }
     const setMyInfo = (data) => {
       myInfo.img = data.img
       myInfo.name = data.name
@@ -77,8 +98,9 @@ export const useMessageStore = defineStore(
       setMyInfo,
       setUserInfo,
       upadteMessageList,
+      getConversationList,
+      conversationList,
     }
   },
-  {
-  },
+  {},
 )

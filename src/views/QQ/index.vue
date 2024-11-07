@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { useMessageStore } from '@/store/modules/Message'
 
@@ -11,8 +11,8 @@ const showMoreOptions = ref(false)
 const showSettings = ref(false)
 const messageInput = ref('')
 const showMediaUpload = ref(false)
-
-const chats = messageStore.userList
+let chats = ref([])
+// const chats = messageStore.userList
 
 const messages = ref([
   {
@@ -45,9 +45,20 @@ const messages = ref([
   },
 ])
 
-const filteredChats = computed(() => {
-  return chats.filter((chat) => chat.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
+onMounted(() => {
+  console.log('sj001')
+  getConversationList()
 })
+// const filteredChats = computed(() => {
+//   return chats.filter((chat) => chat.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
+// })
+
+const getConversationList = async () => {
+  console.log('sj002')
+  await messageStore.getConversationList()
+  chats.value = messageStore.conversationList
+  console.log(chats.value, '用户列表')
+}
 
 const selectChat = (chat) => {
   selectedChat.value = chat
@@ -132,15 +143,15 @@ const handleDrop = (event) => {
       </div>
       <div class="chat-list">
         <div
-          v-for="chat in filteredChats"
+          v-for="chat in chats"
           :key="chat.id"
           class="chat-item"
           :class="{ selected: selectedChat === chat }"
           @click="selectChat(chat)"
         >
-          <a-avatar :src="chat.avatar" />
+          <a-avatar :src="chat.faceURL" />
           <div class="chat-info">
-            <div class="chat-name">{{ chat.name }}</div>
+            <div class="chat-name">{{ chat.showName }}</div>
             <div class="last-message">{{ chat.lastMessage }}</div>
           </div>
           <div class="chat-meta">

@@ -15,10 +15,12 @@
     "@openim/wasm-client-sdk": "3.8.2-1",
     "ant-design-vue": "~4.2.5",
     "axios": "^1.7.7",
+    "md5": "^2.3.0",
     "nprogress": "^0.2.0",
     "pinia": "^2.2.2",
     "pinia-plugin-persistedstate": "^4.0.2",
     "scss": "^0.2.4",
+    "uuid": "^10.0.0",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
   },
