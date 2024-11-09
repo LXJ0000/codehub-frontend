@@ -1,7 +1,13 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import { useMessageStore } from '@/store/modules/Message'
+import AddFriendModal from './components/AddFriendModal.vue'
+import CreateGroupModal from './components/CreateGroupModal.vue'
+import UserProfileDrawer from './components/UserProfileDrawer.vue'
+import MoreOptionsDrawer from './components/MoreOptionDrawer.vue'
+import SettingsDrawer from './components/SettingsDrawer.vue'
+import MediaUploadModal from './components/MediaUploadModal.vue'
 
 const messageStore = useMessageStore()
 const searchQuery = ref('')
@@ -11,8 +17,10 @@ const showMoreOptions = ref(false)
 const showSettings = ref(false)
 const messageInput = ref('')
 const showMediaUpload = ref(false)
-let chats = ref([])
-// const chats = messageStore.userList
+const chats = ref([])
+const showAddMenu = ref(false)
+const showAddFriendModal = ref(false)
+const showCreateGroupModal = ref(false)
 
 const messages = ref([
   {
@@ -46,18 +54,12 @@ const messages = ref([
 ])
 
 onMounted(() => {
-  console.log('sj001')
   getConversationList()
 })
-// const filteredChats = computed(() => {
-//   return chats.filter((chat) => chat.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
-// })
 
 const getConversationList = async () => {
-  console.log('sj002')
   await messageStore.getConversationList()
   chats.value = messageStore.conversationList
-  console.log(chats.value, '用户列表')
 }
 
 const selectChat = (chat) => {
@@ -101,49 +103,55 @@ const toggleMediaUpload = () => {
   showMediaUpload.value = !showMediaUpload.value
 }
 
-const handleFileUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    // Here you would typically upload the file to your server
-    // For this example, we'll just add a placeholder message
-    messages.value.push({
-      id: messages.value.length + 1,
-      sender: 'user',
-      content: `Uploaded file: ${file.name}`,
-      time: new Date().toLocaleString(),
-      avatar: '/placeholder.svg?height=40&width=40',
-    })
+const handleAddMenuClick = ({ key }) => {
+  if (key === 'createGroup') {
+    showCreateGroupModal.value = true
+  } else if (key === 'addFriend') {
+    showAddFriendModal.value = true
   }
-  showMediaUpload.value = false
 }
 
-const handleDrop = (event) => {
-  event.preventDefault()
-  const file = event.dataTransfer.files[0]
-  if (file) {
-    // Here you would typically upload the file to your server
-    // For this example, we'll just add a placeholder message
-    messages.value.push({
-      id: messages.value.length + 1,
-      sender: 'user',
-      content: `Uploaded file: ${file.name}`,
-      time: new Date().toLocaleString(),
-      avatar: '/placeholder.svg?height=40&width=40',
-    })
-  }
-  showMediaUpload.value = false
-}
+const filteredChats = computed(() => {
+  return chats.value.filter((chat) =>
+    chat.showName.toLowerCase().includes(searchQuery.value.toLowerCase()),
+  )
+})
 </script>
 
 <template>
   <div class="chat-interface">
     <div class="sidebar">
       <div class="search-bar">
-        <a-input-search v-model:value="searchQuery" placeholder="搜索" />
+        <div class="search-container">
+          <a-input-search v-model:value="searchQuery" placeholder="搜索" />
+          <a-dropdown
+            v-model:open="showAddMenu"
+            trigger="click"
+            placement="bottomRight"
+            :getPopupContainer="(triggerNode) => triggerNode.parentNode"
+          >
+            <a-button class="add-button">
+              <PlusOutlined />
+            </a-button>
+            <template #overlay>
+              <a-menu @click="handleAddMenuClick">
+                <a-menu-item key="createGroup">
+                  <span class="menu-item-content"> 创建群聊 </span>
+                </a-menu-item>
+                <a-menu-item key="addFriend">
+                  <span class="menu-item-content">
+                    <UserAddOutlined />
+                    加好友/群
+                  </span>
+                </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
+        </div>
       </div>
       <div class="chat-list">
         <div
-          v-for="chat in chats"
+          v-for="chat in filteredChats"
           :key="chat.id"
           class="chat-item"
           :class="{ selected: selectedChat === chat }"
@@ -201,45 +209,20 @@ const handleDrop = (event) => {
       </div>
     </div>
 
-    <a-drawer v-model:open="showUserProfile" title="用户资料" placement="right" :width="300">
-      <div v-if="selectedChat">
-        <a-avatar :size="64" :src="selectedChat.avatar" />
-        <h2>{{ selectedChat.name }}</h2>
-        <p>QQ: 2925315190</p>
-        <p>等级: 🌙</p>
-        <p>个性签名: 黄昏中</p>
-        <a-button type="primary">发消息</a-button>
-        <a-button>音视频通话</a-button>
-      </div>
-    </a-drawer>
+    <UserProfileDrawer v-model:open="showUserProfile" :selected-chat="selectedChat" />
 
-    <a-drawer v-model:open="showMoreOptions" title="更多选项" placement="right" :width="300">
-      <a-menu>
-        <a-menu-item @click="handleAction('Pin chat')">置顶聊天</a-menu-item>
-        <a-menu-item @click="handleAction('Mute notifications')">消息免打扰</a-menu-item>
-        <a-menu-item @click="handleAction('Clear chat history')">清空聊天记录</a-menu-item>
-        <a-menu-item @click="handleAction('Block user')">屏蔽此人</a-menu-item>
-        <a-menu-item @click="handleAction('Delete chat')">删除好友</a-menu-item>
-      </a-menu>
-    </a-drawer>
+    <MoreOptionsDrawer v-model:open="showMoreOptions" @handle-action="handleAction" />
 
-    <a-drawer v-model:open="showSettings" title="设置" placement="left" :width="300">
-      <a-menu>
-        <a-menu-item @click="handleAction('Account settings')">账号设置</a-menu-item>
-        <a-menu-item @click="handleAction('Privacy settings')">隐私设置</a-menu-item>
-        <a-menu-item @click="handleAction('Notification settings')">消息设置</a-menu-item>
-        <a-menu-item @click="handleAction('General settings')">通用设置</a-menu-item>
-        <a-menu-item @click="handleAction('About')">关于</a-menu-item>
-        <a-menu-item @click="handleAction('Logout')">退出账号</a-menu-item>
-      </a-menu>
-    </a-drawer>
+    <SettingsDrawer v-model:open="showSettings" @handle-action="handleAction" />
 
-    <a-modal v-model:open="showMediaUpload" title="上传图片或视频" :footer="null">
-      <div class="upload-area" @dragover.prevent @drop="handleDrop">
-        <p>拖放文件到这里或者</p>
-        <input type="file" @change="handleFileUpload" accept="image/*,video/*" />
-      </div>
-    </a-modal>
+    <MediaUploadModal
+      v-model:open="showMediaUpload"
+      @upload-file="(file) => handleAction(`Uploaded file: ${file.name}`)"
+    />
+
+    <AddFriendModal v-model:open="showAddFriendModal" />
+
+    <CreateGroupModal v-model:open="showCreateGroupModal" />
   </div>
 </template>
 
@@ -358,17 +341,17 @@ const handleDrop = (event) => {
 }
 
 .message.user {
-  justify-content: flex-end; /* 用户消息靠右 */
+  justify-content: flex-end;
 }
 
 .message.other {
-  justify-content: flex-start; /* 好友消息靠左 */
+  justify-content: flex-start;
 }
 
 .message-avatar {
-  flex-shrink: 0; /* 防止头像缩小 */
-  margin-left: 12px; /* 用户消息时头像与消息的间距 */
-  margin-right: 12px; /* 好友消息时头像与消息的间距 */
+  flex-shrink: 0;
+  margin-left: 12px;
+  margin-right: 12px;
 }
 
 .message-bubble {
@@ -412,15 +395,32 @@ const handleDrop = (event) => {
   width: 100%;
 }
 
-.upload-area {
-  border: 2px dashed #d9d9d9;
-  border-radius: 4px;
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.upload-area:hover {
-  border-color: #40a9ff;
+.add-button {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-item-content {
+  display: flex;
+  align-items: center;
+}
+
+:deep(.ant-dropdown-menu-item) {
+  padding: 8px 12px;
+}
+
+:deep(.ant-input-search) {
+  flex-grow: 1;
 }
 </style>

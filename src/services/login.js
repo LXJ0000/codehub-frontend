@@ -15,3 +15,7 @@ export const sendCode = (data) => {
 export const loginSms = (data) => {
   return request('/login/sms', 'POST', data)
 }
+
+export const userSearch = (data) => {
+  return request('/user/search', 'POST', data)
+}
