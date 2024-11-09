@@ -1,5 +1,11 @@
 export const constantRoutes = [
   {
+    path: '/chat',
+    name: 'Chat',
+    component: () => import('@/views/Chat/index.vue'),
+    meta: { title: 'Chat', icon: 'Chat', hidden: true },
+  },
+  {
     path: '/user/:id',
     name: 'UserProfile',
     component: () => import('@/views/UserProfile/index.vue'),
