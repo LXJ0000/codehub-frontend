@@ -1,8 +1,8 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { message } from 'ant-design-vue'
 import { useConversationStore } from '@/store/modules/conversation'
-import { useMessageStore } from '@/store/modules/Message'
+import { useMessageStore } from '@/store/modules/message'
 import { useUserStore } from '@/store/modules/user'
 import AddFriendModal from './components/AddFriendModal.vue'
 import CreateGroupModal from './components/CreateGroupModal.vue'
@@ -10,6 +10,8 @@ import UserProfileDrawer from './components/UserProfileDrawer.vue'
 import MoreOptionsDrawer from './components/MoreOptionDrawer.vue'
 import SettingsDrawer from './components/SettingsDrawer.vue'
 import MediaUploadModal from './components/MediaUploadModal.vue'
+import { CbEvents } from '@openim/wasm-client-sdk'
+import { IMSDK } from '@/utils/imCommon'
 
 const conversationStore = useConversationStore()
 const messageStore = useMessageStore()
@@ -27,9 +29,37 @@ const showAddFriendModal = ref(false)
 const showCreateGroupModal = ref(false)
 
 const messages = ref([])
+const messageListRef = ref(null)
 
 onMounted(() => {
   getConversationList()
+  console.log('log.onMounted.1')
+  IMSDK.on(CbEvents.OnRecvNewMessages, ({ data }) => {
+    console.log('log.OnRecvNewMessages.data', data)
+    console.log('log.OnRecvNewMessages', 'data[0]', data[0])
+    console.log('log.OnRecvNewMessages', 'selectedChat.value.userID', selectedChat.value.userID)
+    const msg = data[0]
+    if (msg.sendID === selectedChat.value.userID) {
+      console.log('log.onMounted.3')
+      messages.value.push({
+        id: messages.value.length + 1,
+        sender: 'other',
+        content: msg.textElem?.content || '',
+        time: msg.sendTime || '',
+        avatar: '/placeholder.svg?height=40&width=40',
+      })
+    } else {
+      const chat = chats.value.find((item) => item.userID === msg.sendID)
+      chat.unread++
+    }
+    // 使用 nextTick 确保 DOM 更新后滚动到底部
+    nextTick(() => {
+      if (messageListRef.value) {
+        messageListRef.value.scrollTop = messageListRef.value.scrollHeight
+      }
+    })
+  })
+  console.log('log.onMounted.2')
 })
 
 const getConversationList = async () => {
@@ -62,6 +92,12 @@ const selectChat = async (chat) => {
   console.log('log.selectChat.3', 3)
 
   console.log('log.selectChat.3', messages.value)
+
+  nextTick(() => {
+    if (messageListRef.value) {
+      messageListRef.value.scrollTop = messageListRef.value.scrollHeight
+    }
+  })
 }
 
 const toggleUserProfile = () => {
@@ -91,6 +127,12 @@ const sendMessage = async () => {
     console.log('log.sendMessage.selectedChat.value', selectedChat.value)
     messageStore.sendMessage(selectedChat.value.userID, msgItem)
     messageInput.value = ''
+
+    nextTick(() => {
+      if (messageListRef.value) {
+        messageListRef.value.scrollTop = messageListRef.value.scrollHeight
+      }
+    })
   }
 }
 
@@ -189,7 +231,7 @@ const filteredChats = computed(() => {
           <MoreOutlined class="action-icon" @click="toggleMoreOptions" />
         </div>
       </div>
-      <div v-if="selectedChat" class="message-list">
+      <div v-if="selectedChat" class="message-list" ref="messageListRef">
         <div v-for="msg in messages" :key="msg.id" :class="['message', msg.sender]">
           <a-avatar v-if="msg.sender === 'other'" :src="msg.avatar" class="message-avatar" />
           <div class="message-bubble">
@@ -425,5 +467,18 @@ const filteredChats = computed(() => {
 
 :deep(.ant-input-search) {
   flex-grow: 1;
+}
+
+.message-list {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 16px;
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.message-list::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 </style>
