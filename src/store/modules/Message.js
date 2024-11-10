@@ -1,106 +1,70 @@
 import { defineStore } from 'pinia'
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import { IMSDK } from '@/utils/imCommon'
-import { useUserStore } from './user'
 
-const userStore = useUserStore()
-export const useMessageStore = defineStore(
-  'message',
-  () => {
-    const myInfo = reactive({
-      img: '',
-      name: '',
+export const useMessageStore = defineStore('message', () => {
+  const messageList = ref([])
+  const getAdvancedHistoryMessageList = async (conversationID) => {
+    try {
+      const { data } = await IMSDK.getAdvancedHistoryMessageList({
+        lastMinSeq: 0,
+        count: 20,
+        startClientMsgID: '',
+        conversationID: conversationID,
+      })
+      console.log('log.success.getAdvancedHistoryMessageList', data)
+      messageList.value = data.messageList
+      return data.messageList
+    } catch (error) {
+      const { errCode, errMsg } = error
+      console.log('log.fail.getAdvancedHistoryMessageList', errCode, errMsg)
+      return null
+    }
+  }
+  const getAdvancedHistoryMessageListReverse = async (conversationID) => {
+    IMSDK.getAdvancedHistoryMessageListReverse({
+      lastMinSeq: 0,
+      count: 20,
+      startClientMsgID: '',
+      conversationID: conversationID,
     })
-    /* 别人的信息（特指聊天对象） */
-    const userInfo = reactive({
-      img: '',
-      name: '',
+      .then(({ data }) => {
+        messageList.value = data.messageList
+        console.log('log.success.getAdvancedHistoryMessageList', data)
+      })
+      .catch(({ errCode, errMsg }) => {
+        console.log('log.fail.getAdvancedHistoryMessageList', errCode, errMsg)
+      })
+  }
+  const sendMessage = async (recvID, msgItem) => {
+    IMSDK.sendMessage({
+      recvID: recvID,
+      groupID: '',
+      message: msgItem,
     })
-    const userList = ref([
-      {
-        id: 1,
-        name: '晴宝大于阳晴月亮',
-        avatar: '/placeholder.svg?height=40&width=40',
-        lastMessage: '可能在放假',
-        time: '2024/06/10',
-        unread: 0,
-      },
-      {
-        id: 2,
-        name: '代码源算法交流群',
-        avatar: '/placeholder.svg?height=40&width=40',
-        lastMessage: '...: 有静态单射',
-        time: '2024/09/02',
-        unread: 0,
-      },
-      {
-        id: 3,
-        name: 'TP-Link2025未来院',
-        avatar: '/placeholder.svg?height=40&width=40',
-        lastMessage: 'Jenny: SHEIN状况, 20w+...',
-        time: '2024/08/28',
-        unread: 0,
-      },
-      {
-        id: 4,
-        name: '🍔2024蓝桥杯',
-        avatar: '/placeholder.svg?height=40&width=40',
-        lastMessage: '郑帆帆-20230502044: 不...',
-        time: '2024/08/26',
-        unread: 0,
-      },
-      {
-        id: 5,
-        name: '好运连连',
-        avatar: '/placeholder.svg?height=40&width=40',
-        lastMessage: '啾咪',
-        time: '2024/06/09',
-        unread: 0,
-      },
-    ])
-    const conversationList = ref([])
-    /* 聊天记录 */
-    const chatMessageList = ref([])
-
-    const getConversationList = async (isScrollLoad = false) => {
-      try {
-        await userStore.tryLogin()
-        const { data } = await IMSDK.getConversationListSplit({
-          offset: isScrollLoad ? this.conversationList.length : 0,
-          count: 20,
-        })
-        console.log('log_getConversationListSplit', data)
-        const cves = data
-        conversationList.value = [...(isScrollLoad ? this.conversationList : []), ...cves]
-        console.log(conversationList.value, '好友列表')
-        return cves.length === 20
-      } catch (error) {
-        console.error(error)
-        return false
-      }
+      .then(({ data }) => {
+        console.log('log.success.store.sendMessage', 'data', data)
+      })
+      .catch(({ errCode, errMsg }) => {
+        console.log('log.fail.store.sendMessage', errCode, errMsg)
+      })
+  }
+  const createTextMessage = async (text) => {
+    try {
+      const { data } = await IMSDK.createTextMessage(text)
+      console.log('log.success.createTextMessage', data)
+      return data
+    } catch (error) {
+      const { errCode, errMsg } = error
+      console.log('log.fail.createTextMessage', errCode, errMsg)
+      return null
     }
-    const setMyInfo = (data) => {
-      myInfo.img = data.img
-      myInfo.name = data.name
-    }
-    const setUserInfo = (data) => {
-      userInfo.img = data.img
-      userInfo.name = data.name
-    }
-    const upadteMessageList = (data) => {
-      chatMessageList.value.push(data)
-    }
-    return {
-      myInfo,
-      userInfo,
-      userList,
-      chatMessageList,
-      setMyInfo,
-      setUserInfo,
-      upadteMessageList,
-      getConversationList,
-      conversationList,
-    }
-  },
-  {},
-)
+  }
+  return {
+    messageList,
+    getAdvancedHistoryMessageList,
+    getAdvancedHistoryMessageListReverse,
+    sendMessage,
+    createTextMessage,
+  }
+})

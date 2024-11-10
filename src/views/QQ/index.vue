@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { message } from 'ant-design-vue'
-import { useMessageStore } from '@/store/modules/Message'
+import { useConversationStore } from '@/store/modules/conversation'
+import { useMessageStore } from '@/store/modules/message'
+import { useUserStore } from '@/store/modules/user'
 import AddFriendModal from './components/AddFriendModal.vue'
 import CreateGroupModal from './components/CreateGroupModal.vue'
 import UserProfileDrawer from './components/UserProfileDrawer.vue'
@@ -9,7 +11,9 @@ import MoreOptionsDrawer from './components/MoreOptionDrawer.vue'
 import SettingsDrawer from './components/SettingsDrawer.vue'
 import MediaUploadModal from './components/MediaUploadModal.vue'
 
+const conversationStore = useConversationStore()
 const messageStore = useMessageStore()
+const userStore = useUserStore()
 const searchQuery = ref('')
 const selectedChat = ref(null)
 const showUserProfile = ref(false)
@@ -58,12 +62,29 @@ onMounted(() => {
 })
 
 const getConversationList = async () => {
-  await messageStore.getConversationList()
-  chats.value = messageStore.conversationList
+  await conversationStore.getConversationList()
+  chats.value = conversationStore.conversationList
 }
 
-const selectChat = (chat) => {
+const selectChat = async (chat) => {
   selectedChat.value = chat
+  console.log('log.selectChat.chat', chat)
+  const data = await messageStore.getAdvancedHistoryMessageList(chat.conversationID)
+  console.log('log.selectChat.data', data)
+  console.log('log.selectChat.1', 1)
+  // 把 data 转换成 messages
+  messages.value = data.map((item) => {
+    return {
+      id: item.clientMsgID || '',
+      sender: item.sendID === userStore.userID ? 'user' : 'other',
+      content: item.textElem?.content || '',
+      time: item.sendTime || '',
+      avatar: '/placeholder.svg?height=40&width=40',
+    }
+  })
+  console.log('log.selectChat.3', 3)
+
+  console.log('log.selectChat.3', messages.value)
 }
 
 const toggleUserProfile = () => {
@@ -78,7 +99,7 @@ const toggleSettings = () => {
   showSettings.value = !showSettings.value
 }
 
-const sendMessage = () => {
+const sendMessage = async () => {
   if (messageInput.value.trim()) {
     messages.value.push({
       id: messages.value.length + 1,
@@ -87,6 +108,11 @@ const sendMessage = () => {
       time: new Date().toLocaleString(),
       avatar: '/placeholder.svg?height=40&width=40',
     })
+    const msgItem = await messageStore.createTextMessage(messageInput.value)
+    console.log('log.sendMessage.msgItem', msgItem)
+
+    console.log('log.sendMessage.selectedChat.value', selectedChat.value)
+    messageStore.sendMessage(selectedChat.value.userID, msgItem)
     messageInput.value = ''
   }
 }
