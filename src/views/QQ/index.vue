@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import { useConversationStore } from '@/store/modules/conversation'
-import { useMessageStore } from '@/store/modules/message'
+import { useMessageStore } from '@/store/modules/Message'
 import { useUserStore } from '@/store/modules/user'
 import AddFriendModal from './components/AddFriendModal.vue'
 import CreateGroupModal from './components/CreateGroupModal.vue'
@@ -26,36 +26,7 @@ const showAddMenu = ref(false)
 const showAddFriendModal = ref(false)
 const showCreateGroupModal = ref(false)
 
-const messages = ref([
-  {
-    id: 1,
-    sender: 'user',
-    content: '【王者荣耀】王者密语高级芯片X3cKIMez，快来参加新年宝藏得周卡全新史诗皮肤',
-    time: '2023/12/23 19:23',
-    avatar: '/placeholder.svg?height=40&width=40',
-  },
-  {
-    id: 2,
-    sender: 'other',
-    content: '【王者荣耀】王者密语地狱铭文ZszmwDoX，快来参加新年宝藏得周卡全新史诗皮肤',
-    time: '2023/12/23 19:28',
-    avatar: '/placeholder.svg?height=40&width=40',
-  },
-  {
-    id: 3,
-    sender: 'user',
-    content: '【王者荣耀】王者密语高级芯片X3cKIMez，快来参加新年宝藏得周卡全新史诗皮肤',
-    time: '2023/12/23 20:23',
-    avatar: '/placeholder.svg?height=40&width=40',
-  },
-  {
-    id: 4,
-    sender: 'other',
-    content: '【王者荣耀】王者密语地狱铭文ZszmwDoX，快来参加新年宝藏得周卡全新史诗皮肤',
-    time: '2023/12/23 21:30',
-    avatar: '/placeholder.svg?height=40&width=40',
-  },
-])
+const messages = ref([])
 
 onMounted(() => {
   getConversationList()
@@ -64,6 +35,12 @@ onMounted(() => {
 const getConversationList = async () => {
   await conversationStore.getConversationList()
   chats.value = conversationStore.conversationList
+  chats.value.forEach((item) => {
+    item.lastMessage = JSON.parse(item.latestMsg).textElem.content
+    item.time = new Date(item.latestMsgSendTime).toLocaleDateString()
+    item.unread = item.unreadCount
+  })
+  console.log('log.chats', JSON.parse(chats.value[0]))
 }
 
 const selectChat = async (chat) => {
@@ -203,7 +180,7 @@ const filteredChats = computed(() => {
     <div class="main-content">
       <div v-if="selectedChat" class="chat-header">
         <div class="chat-title" @click="toggleUserProfile">
-          <span>{{ selectedChat.name }}</span>
+          <span>{{ selectedChat.showName }}</span>
         </div>
         <div class="chat-actions">
           <PhoneOutlined class="action-icon" @click="handleAction('Voice call')" />
@@ -217,7 +194,7 @@ const filteredChats = computed(() => {
           <a-avatar v-if="msg.sender === 'other'" :src="msg.avatar" class="message-avatar" />
           <div class="message-bubble">
             <div class="message-content">{{ msg.content }}</div>
-            <div class="message-time">{{ msg.time }}</div>
+            <div class="message-time">{{ new Date(msg.time).toLocaleString() }}</div>
           </div>
           <a-avatar v-if="msg.sender === 'user'" :src="msg.avatar" class="message-avatar" />
         </div>
