@@ -1,5 +1,11 @@
 export const constantRoutes = [
   {
+    path: '/wb',
+    name: 'wb',
+    component: () => import('@/views/wb/index.vue'),
+    meta: { title: 'wb', icon: 'wb', hidden: true },
+  },
+  {
     path: '/chat',
     name: 'Chat',
     component: () => import('@/views/Chat/index.vue'),

@@ -86,7 +86,8 @@ const selectChat = async (chat) => {
       sender: item.sendID === userStore.userID ? 'user' : 'other',
       content: item.textElem?.content || '',
       time: item.sendTime || '',
-      avatar: '/placeholder.svg?height=40&width=40',
+      avatar:
+        'http://localhost:10004/api/v1/buckets/user.avatar/objects/download?preview=true&prefix=OWQ3MWVjZDA5NTcxZjQyMWNhNzIyNmQyMzQxYjIxYy5qcGc=&version_id=null',
     }
   })
   console.log('log.selectChat.3', 3)
