@@ -52,12 +52,15 @@ const menuItems = [
 :deep(.ant-menu-item) {
   height: 40px;
   line-height: 40px;
-  margin: 8px 0;
   padding: 0 16px;
 }
 
 :deep(.ant-menu-item-selected) {
   background-color: #f0f7ff !important;
   color: #a5d5ff !important;
+}
+
+:deep(.ant-menu-light) {
+  border-inline-end-width: 0px !important;
 }
 </style>
