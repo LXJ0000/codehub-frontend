@@ -73,88 +73,6 @@ const posts = ref([
     reposts: 1,
     likes: 15,
   },
-  {
-    username: '用户2',
-    avatar: '/placeholder.svg?height=40&width=40',
-    time: '30分钟前',
-    content: '这是另一条示例悦联，没有图片。',
-    comments: 3,
-    reposts: 1,
-    likes: 15,
-  },
-  {
-    username: '用户2',
-    avatar: '/placeholder.svg?height=40&width=40',
-    time: '30分钟前',
-    content: '这是另一条示例悦联，没有图片。',
-    comments: 3,
-    reposts: 1,
-    likes: 15,
-  },
-  {
-    username: '用户2',
-    avatar: '/placeholder.svg?height=40&width=40',
-    time: '30分钟前',
-    content: '这是另一条示例悦联，没有图片。',
-    comments: 3,
-    reposts: 1,
-    likes: 15,
-  },
-  {
-    username: '用户2',
-    avatar: '/placeholder.svg?height=40&width=40',
-    time: '30分钟前',
-    content: '这是另一条示例悦联，没有图片。',
-    comments: 3,
-    reposts: 1,
-    likes: 15,
-  },
-  {
-    username: '用户2',
-    avatar: '/placeholder.svg?height=40&width=40',
-    time: '30分钟前',
-    content: '这是另一条示例悦联，没有图片。',
-    comments: 3,
-    reposts: 1,
-    likes: 15,
-  },
-  {
-    username: '用户2',
-    avatar: '/placeholder.svg?height=40&width=40',
-    time: '30分钟前',
-    content: '这是另一条示例悦联，没有图片。',
-    comments: 3,
-    reposts: 1,
-    likes: 15,
-  },
-  {
-    username: '用户2',
-    avatar: '/placeholder.svg?height=40&width=40',
-    time: '30分钟前',
-    content: '这是另一条示例悦联，没有图片。',
-    comments: 3,
-    reposts: 1,
-    likes: 15,
-  },
-  {
-    username: '用户2',
-    avatar: '/placeholder.svg?height=40&width=40',
-    time: '30分钟前',
-    content: '这是另一条示例悦联，没有图片。',
-    comments: 3,
-    reposts: 1,
-    likes: 15,
-  },
-  {
-    username: '用户2',
-    avatar: '/placeholder.svg?height=40&width=40',
-    time: '30分钟前',
-    content: '这是另一条示例悦联，没有图片。',
-    comments: 3,
-    reposts: 1,
-    likes: 15,
-  },
-
   // 可以添加更多的帖子数据
 ])
 </script>
@@ -249,6 +167,7 @@ const posts = ref([
   border: none;
   cursor: pointer;
 }
+
 .ant-menu-horizontal {
   border-radius: 8px;
 }

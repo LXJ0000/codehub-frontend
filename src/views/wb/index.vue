@@ -6,7 +6,9 @@
       <LeftView />
 
       <main class="main-content">
-        <MidView />
+        <router-view></router-view>
+        <!-- <UserProfile /> -->
+        <!-- <MidView /> -->
       </main>
 
       <RightView />
@@ -17,8 +19,9 @@
 <script setup>
 import NavView from '@/components/navView.vue'
 import LeftView from './components/leftView.vue'
-import MidView from './components/midView.vue'
 import RightView from './components/rightView.vue'
+// import UserProfile from './components/UserProfile.vue'
+// import MidView from './components/midView.vue'
 </script>
 
 <style>

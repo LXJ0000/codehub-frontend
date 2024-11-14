@@ -2,9 +2,26 @@ export const constantRoutes = [
   {
     path: '/wb',
     name: 'wb',
-    component: () => import('@/views/wb/index.vue'),
-    meta: { title: 'wb', icon: 'wb', hidden: true },
+    component: () => import('@/views/wb/index.vue'), // Parent component
+    children: [
+      {
+        path: '', // Default route for `/wb`
+        component: () => import('@/views/wb/components/midView.vue'), // Render this when it's just `/wb`
+        meta: { title: 'WB Home' },
+      },
+      {
+        path: 'u/:userid', // Dynamic route for user profile
+        component: () => import('@/views/wb/components/UserProfile.vue'), // Render this when it's `/wb/u/:userid`
+        meta: { title: 'User Profile' },
+      },
+    ],
   },
+  // {
+  //   path: '/wb/u/:userId',
+  //   name: 'userProfile',
+  //   component: () => import('@/views/wb/components/UserProfile.vue'),
+  //   meta: { title: '用户主页', icon: 'user', hidden: true },
+  // },
   {
     path: '/chat',
     name: 'Chat',
