@@ -30,17 +30,14 @@ import RightView from './components/rightView.vue'
 
 .main-container {
   display: flex;
-  /* margin-top: 100px; */
-  margin: 75px 150px 0 150px;
-  margin-top: 70px !important;
-  min-height: calc(100vh - 60px);
-  /* position: relative; */
+  margin: 70px 150px 0;
+  min-height: calc(100vh - 70px);
 }
 
 .main-content {
   flex: 1;
-  /* margin: 0 100px; */
-  margin-left: 200px;
+  margin-left: 220px;
+  margin-right: 20px;
   min-width: 0;
 }
 </style>

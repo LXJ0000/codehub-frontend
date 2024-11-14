@@ -1,22 +1,43 @@
 <template>
-  <nav class="sub-nav">
-    <a-menu mode="horizontal" :selectedKeys="[selectedKey]">
-      <a-menu-item v-for="item in navItems" :key="item.key" @click="handleNavClick(item.key)">
-        {{ item.label }}
-      </a-menu-item>
-      <a-menu-item key="more">
-        <MoreHorizontal class="more-icon" />
-      </a-menu-item>
-    </a-menu>
-  </nav>
-  <div class="feed"></div>
+  <div class="mid-view">
+    <nav class="sub-nav">
+      <a-menu mode="horizontal" :selectedKeys="[selectedKey]">
+        <a-menu-item v-for="item in navItems" :key="item.key" @click="handleNavClick(item.key)">
+          {{ item.label }}
+        </a-menu-item>
+        <a-menu-item key="more">
+          <MoreHorizontal class="more-icon" />
+        </a-menu-item>
+      </a-menu>
+    </nav>
+    <div class="feed">
+      <div v-for="(post, index) in posts" :key="index" class="post-card">
+        <div class="post-header">
+          <img :src="post.avatar" alt="User Avatar" class="avatar" />
+          <div class="user-info">
+            <h3>{{ post.username }}</h3>
+            <span class="post-time">{{ post.time }}</span>
+          </div>
+        </div>
+        <p class="post-content">{{ post.content }}</p>
+        <div v-if="post.image" class="post-image">
+          <img :src="post.image" alt="Post Image" />
+        </div>
+        <div class="post-actions">
+          <button><MessageSquare /> {{ post.comments }}</button>
+          <button><Repeat2 /> {{ post.reposts }}</button>
+          <button><Heart /> {{ post.likes }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { MoreHorizontal } from 'lucide-vue-next'
+import { MoreHorizontal, MessageSquare, Repeat2, Heart } from 'lucide-vue-next'
 
-const selectedKey = ref('榜单')
+const selectedKey = ref('热门')
 
 const navItems = [
   { key: '热门', label: '热门' },
@@ -31,15 +52,41 @@ const navItems = [
 const handleNavClick = (key) => {
   selectedKey.value = key
 }
+
+const posts = ref([
+  {
+    username: '用户1',
+    avatar: '/placeholder.svg?height=40&width=40',
+    time: '10分钟前',
+    content: '这是一条示例微博内容，展示了基本的文本布局和样式。',
+    image: '/placeholder.svg?height=300&width=400',
+    comments: 10,
+    reposts: 5,
+    likes: 20,
+  },
+  {
+    username: '用户2',
+    avatar: '/placeholder.svg?height=40&width=40',
+    time: '30分钟前',
+    content: '这是另一条示例微博，没有图片。',
+    comments: 3,
+    reposts: 1,
+    likes: 15,
+  },
+  // 可以添加更多的帖子数据
+])
 </script>
 
 <style scoped>
+.mid-view {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
 .sub-nav {
   background: #fff;
   border-radius: 4px;
   margin-bottom: 20px;
-  margin: 0 auto;
-  max-width: 600px;
 }
 
 :deep(.ant-menu-horizontal) {
@@ -59,5 +106,64 @@ const handleNavClick = (key) => {
 
 :deep(.ant-menu-item-active) {
   background-color: white !important;
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.user-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.post-time {
+  font-size: 12px;
+}
+
+.post-content {
+  margin-bottom: 12px;
+}
+
+.post-image img {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.post-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.post-actions button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 </style>

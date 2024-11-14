@@ -35,9 +35,10 @@ const menuItems = [
   width: 200px;
   background: #fff;
   border-right: 1px solid #e8e8e8;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 70px);
   position: fixed;
   overflow-y: auto;
+  padding: 20px 10px;
 }
 
 .menu-icon {
@@ -51,7 +52,8 @@ const menuItems = [
 :deep(.ant-menu-item) {
   height: 40px;
   line-height: 40px;
-  margin: 4px 0;
+  margin: 8px 0;
+  padding: 0 16px;
 }
 
 :deep(.ant-menu-item-selected) {

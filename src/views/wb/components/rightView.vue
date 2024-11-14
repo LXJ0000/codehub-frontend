@@ -58,7 +58,8 @@ const hotTopics = ref([
 <style scoped>
 .right-sidebar {
   width: 300px;
-  /* margin-left: 20px; */
+  position: sticky;
+  top: 90px;
 }
 
 .login-card {
@@ -91,7 +92,7 @@ const hotTopics = ref([
 .hot-topics {
   background: #fff;
   border-radius: 4px;
-  padding: 20px;
+  padding: 24px;
 }
 
 .topics-header {
@@ -111,6 +112,7 @@ const hotTopics = ref([
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 8px 0;
 }
 
 .topic-rank {
