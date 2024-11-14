@@ -7,7 +7,6 @@
 
       <main class="main-content">
         <MidView />
-        <router-view></router-view>
       </main>
 
       <RightView />
@@ -16,7 +15,7 @@
 </template>
 
 <script setup>
-import NavView from './components/navView.vue'
+import NavView from '@/components/navView.vue'
 import LeftView from './components/leftView.vue'
 import MidView from './components/midView.vue'
 import RightView from './components/rightView.vue'
@@ -36,8 +35,8 @@ import RightView from './components/rightView.vue'
 
 .main-content {
   flex: 1;
-  margin-left: 220px;
-  margin-right: 20px;
+  margin-left: 210px;
+  margin-right: 10px;
   min-width: 0;
 }
 </style>

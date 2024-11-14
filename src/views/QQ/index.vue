@@ -12,6 +12,7 @@ import SettingsDrawer from './components/SettingsDrawer.vue'
 import MediaUploadModal from './components/MediaUploadModal.vue'
 import { CbEvents } from '@openim/wasm-client-sdk'
 import { IMSDK } from '@/utils/imCommon'
+import NavView from '@/components/navView.vue'
 
 const conversationStore = useConversationStore()
 const messageStore = useMessageStore()
@@ -165,6 +166,7 @@ const filteredChats = computed(() => {
 </script>
 
 <template>
+  <NavView />
   <div class="chat-interface">
     <div class="sidebar">
       <div class="search-bar">

@@ -8,14 +8,14 @@
       />
       <a-button type="primary" block class="login-btn"> 立即登录 </a-button>
       <div class="register-prompt">
-        还没有微博？
+        还没有悦联？
         <a href="#" class="register-link">立即注册！</a>
       </div>
     </div>
 
     <div class="hot-topics">
       <div class="topics-header">
-        <h3>微博热搜</h3>
+        <h3>悦联热搜</h3>
         <a-button type="link" class="refresh-btn">
           <RefreshCw class="refresh-icon" />
           点击刷新

@@ -22,7 +22,7 @@ const selectedKey = ref('hot-recommend')
 const menuItems = [
   { key: 'hot-recommend', label: '热门推荐', icon: Flame },
   { key: 'hot-list', label: '热门榜单', icon: Clock },
-  { key: 'hot-search', label: '微博热搜', icon: Search },
+  { key: 'hot-search', label: '悦联热搜', icon: Search },
   { key: 'my', label: '我的', icon: User },
   { key: 'hot-topics', label: '热搜', icon: TrendingUp },
   { key: 'entertainment', label: '文娱', icon: Star },
@@ -34,7 +34,7 @@ const menuItems = [
 .left-sidebar {
   width: 200px;
   background: #fff;
-  border-right: 1px solid #e8e8e8;
+  border-radius: 8px;
   height: calc(100vh - 70px);
   position: fixed;
   overflow-y: auto;

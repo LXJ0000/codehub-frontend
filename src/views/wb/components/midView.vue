@@ -24,9 +24,9 @@
           <img :src="post.image" alt="Post Image" />
         </div>
         <div class="post-actions">
-          <button><MessageSquare /> {{ post.comments }}</button>
-          <button><Repeat2 /> {{ post.reposts }}</button>
-          <button><Heart /> {{ post.likes }}</button>
+          <button><MessageSquare style="height: 16px" /> {{ post.comments }}</button>
+          <button><Repeat2 style="height: 16px" /> {{ post.reposts }}</button>
+          <button><Heart style="height: 16px" /> {{ post.likes }}</button>
         </div>
       </div>
     </div>
@@ -58,7 +58,7 @@ const posts = ref([
     username: '用户1',
     avatar: '/placeholder.svg?height=40&width=40',
     time: '10分钟前',
-    content: '这是一条示例微博内容，展示了基本的文本布局和样式。',
+    content: '这是一条示例悦联内容，展示了基本的文本布局和样式。',
     image: '/placeholder.svg?height=300&width=400',
     comments: 10,
     reposts: 5,
@@ -68,25 +68,107 @@ const posts = ref([
     username: '用户2',
     avatar: '/placeholder.svg?height=40&width=40',
     time: '30分钟前',
-    content: '这是另一条示例微博，没有图片。',
+    content: '这是另一条示例悦联，没有图片。',
     comments: 3,
     reposts: 1,
     likes: 15,
   },
+  {
+    username: '用户2',
+    avatar: '/placeholder.svg?height=40&width=40',
+    time: '30分钟前',
+    content: '这是另一条示例悦联，没有图片。',
+    comments: 3,
+    reposts: 1,
+    likes: 15,
+  },
+  {
+    username: '用户2',
+    avatar: '/placeholder.svg?height=40&width=40',
+    time: '30分钟前',
+    content: '这是另一条示例悦联，没有图片。',
+    comments: 3,
+    reposts: 1,
+    likes: 15,
+  },
+  {
+    username: '用户2',
+    avatar: '/placeholder.svg?height=40&width=40',
+    time: '30分钟前',
+    content: '这是另一条示例悦联，没有图片。',
+    comments: 3,
+    reposts: 1,
+    likes: 15,
+  },
+  {
+    username: '用户2',
+    avatar: '/placeholder.svg?height=40&width=40',
+    time: '30分钟前',
+    content: '这是另一条示例悦联，没有图片。',
+    comments: 3,
+    reposts: 1,
+    likes: 15,
+  },
+  {
+    username: '用户2',
+    avatar: '/placeholder.svg?height=40&width=40',
+    time: '30分钟前',
+    content: '这是另一条示例悦联，没有图片。',
+    comments: 3,
+    reposts: 1,
+    likes: 15,
+  },
+  {
+    username: '用户2',
+    avatar: '/placeholder.svg?height=40&width=40',
+    time: '30分钟前',
+    content: '这是另一条示例悦联，没有图片。',
+    comments: 3,
+    reposts: 1,
+    likes: 15,
+  },
+  {
+    username: '用户2',
+    avatar: '/placeholder.svg?height=40&width=40',
+    time: '30分钟前',
+    content: '这是另一条示例悦联，没有图片。',
+    comments: 3,
+    reposts: 1,
+    likes: 15,
+  },
+  {
+    username: '用户2',
+    avatar: '/placeholder.svg?height=40&width=40',
+    time: '30分钟前',
+    content: '这是另一条示例悦联，没有图片。',
+    comments: 3,
+    reposts: 1,
+    likes: 15,
+  },
+  {
+    username: '用户2',
+    avatar: '/placeholder.svg?height=40&width=40',
+    time: '30分钟前',
+    content: '这是另一条示例悦联，没有图片。',
+    comments: 3,
+    reposts: 1,
+    likes: 15,
+  },
+
   // 可以添加更多的帖子数据
 ])
 </script>
 
 <style scoped>
 .mid-view {
-  max-width: 600px;
+  width: 600px;
   margin: 0 auto;
 }
 
 .sub-nav {
   background: #fff;
-  border-radius: 4px;
-  margin-bottom: 20px;
+  border-radius: 8px;
+  margin-bottom: 10px;
 }
 
 :deep(.ant-menu-horizontal) {
@@ -111,7 +193,7 @@ const posts = ref([
 .feed {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
 }
 
 .post-card {
@@ -156,6 +238,7 @@ const posts = ref([
 .post-actions {
   display: flex;
   justify-content: space-between;
+  font-size: 12px;
 }
 
 .post-actions button {
@@ -165,5 +248,8 @@ const posts = ref([
   background: none;
   border: none;
   cursor: pointer;
+}
+.ant-menu-horizontal {
+  border-radius: 8px;
 }
 </style>
