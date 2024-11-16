@@ -1,6 +1,6 @@
 <template>
   <aside class="right-sidebar">
-    <div class="login-card">
+    <div v-if="isLogin" class="login-card">
       <img
         src="https://tvax1.sinaimg.cn/crop.0.0.1079.1079.180/006UebRdly8hket8gaah4j30tz0tzmz2.jpg?KID=imgbed,tva&Expires=1731430147&ssig=4qtJVzbHnZ"
         alt="登录横幅"
@@ -11,6 +11,32 @@
         还没有悦联？
         <a href="#" class="register-link">立即注册！</a>
       </div>
+    </div>
+    <div v-else class="profile-card">
+      <div class="avatar">
+        <img :src="user.avatarUrl" alt="头像" class="profile-avatar" />
+      </div>
+      <div class="profile-header">
+        <div class="profile-info">
+          <h4 class="profile-name">{{ user.username }}</h4>
+          <p class="profile-signature">{{ user.signature }}</p>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <span class="stat-label">关注 </span>
+          <span class="stat-value">{{ user.following }}</span>
+        </div>
+        <div class="profile-stat">
+          <span class="stat-label">粉丝 </span>
+          <span class="stat-value">{{ user.followers }}</span>
+        </div>
+        <div class="profile-stat">
+          <span class="stat-label">帖子 </span>
+          <span class="stat-value">{{ user.posts }}</span>
+        </div>
+      </div>
+      <a-button type="primary" block @click="logout">退出登录</a-button>
     </div>
 
     <div class="hot-topics">
@@ -41,6 +67,16 @@
 import { ref } from 'vue'
 import { RefreshCw } from 'lucide-vue-next'
 
+const isLogin = ref(false)
+const user = ref({
+  username: '梦奴QQ',
+  avatarUrl:
+    'https://tvax1.sinaimg.cn/crop.0.0.1079.1079.180/006UebRdly8hket8gaah4j30tz0tzmz2.jpg?KID=imgbed,tva&Expires=1731430147&ssig=4qtJVzbHnZ',
+  signature: '这个人很懒，什么都没留下',
+  following: 11,
+  followers: 22,
+  posts: 66,
+})
 const hotTopics = ref([
   { title: '杭州一宝马路口连撞多车', count: '57651' },
   { title: '李子柒回归', count: '下午趋势' },
@@ -62,7 +98,8 @@ const hotTopics = ref([
   top: 90px;
 }
 
-.login-card {
+.login-card,
+.profile-card {
   background: #fff;
   border-radius: 4px;
   padding: 20px;
@@ -132,5 +169,67 @@ const hotTopics = ref([
 
 :deep(.ant-list-item) {
   padding: 12px 0;
+}
+.avatar {
+  display: flex;
+  justify-content: center;
+  img {
+    width: 150px;
+    height: 150px;
+  }
+}
+.profile-header {
+  display: flex;
+
+  /* justify-content: center; */
+  /* margin-bottom: 16px; */
+}
+
+.profile-avatar {
+  /* width: 40px;
+  height: 40px; */
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.profile-signature {
+  color: #666;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  /* margin-top: 10px; */
+}
+
+.profile-stats {
+  display: flex;
+  justify-content: space-evenly;
+  margin: 0 auto;
+  margin-bottom: 16px;
+}
+
+.profile-stat {
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #999;
+}
+
+.stat-value {
+  font-weight: bold;
+  color: #333;
 }
 </style>
