@@ -64,7 +64,7 @@
       <main class="feed module">
         <div class="post-creation">
           <a-input
-            v-model:value="newPostContent"
+            v-model:value="newPost.content"
             placeholder="有什么想和大家分享的？"
             :maxLength="20"
             showCount
@@ -153,7 +153,7 @@
       </aside>
     </div>
 
-    <a-modal v-model:open="postModalVisible" title="发布新内容" @ok="submitNewPost">
+    <a-modal v-model:open="postModalVisible" title="发布新内容" @ok="submitPost">
       <a-form :model="newPost" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item label="标题">
           <a-input v-model:value="newPost.title" />
@@ -181,7 +181,6 @@ import * as api from '@/services/api'
 const router = useRouter()
 const searchQuery = ref('')
 const activeTab = ref('all')
-const newPostContent = ref('')
 const posts = ref([])
 const loading = ref(false)
 const postModalVisible = ref(false)
@@ -323,20 +322,16 @@ const sharePost = (post) => {
 }
 
 const submitPost = async () => {
-  if (!newPostContent.value.trim()) {
+  if (!newPost.value.content.trim()) {
     message.warning('请输入内容')
     return
   }
   try {
-    const response = await api.submitPost(newPostContent.value)
-    // const response = await request('/post', 'POST', {
-    //   title: '',
-    //   content: newPostContent.value,
-    //   status: 'publish',
-    // })
+    console.log('log.submitPost1:', newPost.value.content)
+    const response = await api.submitPost(newPost.value.content)
     if (response.code === 0) {
       message.success('发布成功')
-      newPostContent.value = ''
+      newPost.value.content = ''
       fetchPosts()
     }
   } catch (error) {
@@ -347,22 +342,6 @@ const submitPost = async () => {
 
 const showPostModal = () => {
   postModalVisible.value = true
-}
-
-const submitNewPost = async () => {
-  try {
-    const response = await api.submitPost(newPost.value)
-    // const response = await request('/post', 'POST', newPost.value)
-    if (response.code === 0) {
-      message.success('发布成功')
-      postModalVisible.value = false
-      newPost.value = { title: '', content: '', status: 'publish', abstract: 'abstract' }
-      fetchPosts()
-    }
-  } catch (error) {
-    console.error('Error submitting new post:', error)
-    message.error('发布失败')
-  }
 }
 
 const onSearch = () => {
