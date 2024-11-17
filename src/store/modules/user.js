@@ -3,7 +3,7 @@ import axios from 'axios'
 import { ref } from 'vue'
 import { logoutApi } from '@/services/login'
 import router from '@/router'
-import { loginSms } from '@/services/login'
+import { loginSms, refreshTokenAPI } from '@/services/login'
 import { IMSDK } from '@/utils/imCommon'
 const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL
 const API_URL = import.meta.env.VITE_IM_API_URL
@@ -123,28 +123,19 @@ export const useUserStore = defineStore(
         throw error
       }
     }
-    const refreshTokenFunc = async () => {
+    const refreshTokenFunc = async (data) => {
       try {
-        const response = await axios.post(
-          `${API_BASE_URL}/refresh`,
-          {
-            refresh_token: refreshToken.value,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken.value}`,
-            },
-          },
-        )
-        if (response.data.code === 0) {
-          accessToken.value = response.data.data.access_token
-          refreshToken.value = response.data.data.refresh_token
+        const response = await refreshTokenAPI(data)
+        if (response.code === 0) {
+          accessToken.value = response.data.access_token
+          refreshToken.value = response.data.refresh_token
           return true
         } else {
           throw new Error(response.data.error || '刷新token失败')
         }
       } catch (error) {
-        console.error('log.刷新token失败:', error)
+        accessToken.value = null
+        refreshToken.value = null
         throw error
       }
     }

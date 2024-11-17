@@ -19,3 +19,7 @@ export const loginSms = (data) => {
 export const userSearch = (data) => {
   return request('/user/search', 'POST', data)
 }
+
+export const refreshTokenAPI = (data) => {
+  return request('/refresh', 'POST', data)
+}
