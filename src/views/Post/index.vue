@@ -176,11 +176,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { request } from '@/utils/request'
-import { useUserStore } from '@/store/modules/user'
-
-const userStore = useUserStore()
-console.log(userStore)
+import * as api from '@/services/api'
 
 const router = useRouter()
 const searchQuery = ref('')
@@ -229,7 +225,8 @@ onMounted(() => {
 
 const fetchUserInfo = async () => {
   try {
-    const response = await request('/user/profile', 'GET')
+    const response = await api.fetchUserInfo()
+    // const response = await request('/user/profile', 'GET')
     if (response.code === 0) {
       currentUser.value.followingCount = response.data.profile.relation_stat.followee
       currentUser.value.followerCount = response.data.profile.relation_stat.follower
@@ -251,7 +248,8 @@ const fetchUserInfo = async () => {
 const fetchPosts = async (page = 1) => {
   loading.value = true
   try {
-    const response = await request('/post/reader', 'GET', { page, size: 10 })
+    const response = await api.fetchPosts(page)
+    // const response = await request('/post/reader', 'GET', { page, size: 10 })
     if (response.code === 0) {
       posts.value = response.data.post_list.map((item) => ({
         id: item.post.post_id,
@@ -285,10 +283,11 @@ const fetchPosts = async (page = 1) => {
 
 const likePost = async (post) => {
   try {
-    const response = await request('/post/like', 'POST', {
-      post_id: post.id,
-      is_like: !post.liked,
-    })
+    const response = await api.likePost(post.id, !post.liked)
+    // const response = await request('/post/like', 'POST', {
+    //   post_id: post.id,
+    //   is_like: !post.liked,
+    // })
     if (response.code === 0) {
       post.liked = !post.liked
       post.likeCount += post.liked ? 1 : -1
@@ -301,11 +300,12 @@ const likePost = async (post) => {
 
 const collectPost = async (post) => {
   try {
-    const response = await request('/post/collect', 'POST', {
-      post_id: post.id,
-      is_collect: !post.collected,
-      collection_id: 0,
-    })
+    const response = await api.collectPost(post.id, !post.collected)
+    // const response = await request('/post/collect', 'POST', {
+    //   post_id: post.id,
+    //   is_collect: !post.collected,
+    //   collection_id: 0,
+    // })
     if (response.code === 0) {
       post.collected = !post.collected
       post.collectCount += post.collected ? 1 : -1
@@ -328,11 +328,12 @@ const submitPost = async () => {
     return
   }
   try {
-    const response = await request('/post', 'POST', {
-      title: '',
-      content: newPostContent.value,
-      status: 'publish',
-    })
+    const response = await api.submitPost(newPostContent.value)
+    // const response = await request('/post', 'POST', {
+    //   title: '',
+    //   content: newPostContent.value,
+    //   status: 'publish',
+    // })
     if (response.code === 0) {
       message.success('发布成功')
       newPostContent.value = ''
@@ -350,7 +351,8 @@ const showPostModal = () => {
 
 const submitNewPost = async () => {
   try {
-    const response = await request('/post', 'POST', newPost.value)
+    const response = await api.submitPost(newPost.value)
+    // const response = await request('/post', 'POST', newPost.value)
     if (response.code === 0) {
       message.success('发布成功')
       postModalVisible.value = false
