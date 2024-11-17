@@ -2,10 +2,10 @@
   <div class="feed">
     <div v-for="(post, index) in posts" :key="index" class="post-card">
       <div class="post-header">
-        <img :src="post.avatar" alt="User Avatar" class="avatar" />
+        <img :src="post.authorAvatar" alt="User Avatar" class="avatar" />
         <div class="user-info">
-          <h3>{{ post.username }}</h3>
-          <span class="post-time">{{ post.time }}</span>
+          <h3>{{ post.authorName }}</h3>
+          <span class="post-time">{{ post.createdAt }}</span>
         </div>
       </div>
       <p class="post-content">{{ post.content }}</p>
@@ -13,30 +13,27 @@
         <img :src="post.image" alt="Post Image" />
       </div>
       <div class="post-actions">
-        <button><MessageSquare style="height: 16px" /> {{ post.comments }}</button>
-        <button><Repeat2 style="height: 16px" /> {{ post.reposts }}</button>
-        <button><Heart style="height: 16px" /> {{ post.likes }}</button>
+        <!-- <button><MessageSquare style="height: 16px" /> {{ post.comments }}</button> -->
+        <!-- <button><Repeat2 style="height: 16px" /> {{ post.reposts }}</button> -->
+        <button><MessageSquare style="height: 16px" /> 0</button>
+        <button><Repeat2 style="height: 16px" /> 0</button>
+        <button><Heart style="height: 16px" /> {{ post.likeCount }}</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { MessageSquare, Repeat2, Heart } from 'lucide-vue-next'
 
-const posts = ref([
-  {
-    username: '用户1',
-    avatar: '/placeholder.svg?height=40&width=40',
-    time: '10分钟前',
-    content: '这是一条示例悦联内容，展示了基本的文本布局和样式。',
-    image: '/placeholder.svg?height=300&width=400',
-    comments: 10,
-    reposts: 5,
-    likes: 20,
+const { posts } = defineProps({
+  posts: {
+    type: Array,
+    default: () => [],
   },
-])
+})
+
+console.log('log.posts', posts)
 </script>
 
 <style scoped>
