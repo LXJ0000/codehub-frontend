@@ -31,6 +31,7 @@
     <div class="profile-content">
       <div v-if="selectedTab === 'weibo'">
         <!-- 使用修改后的 MidView 组件来显示用户的文章 -->
+        <Feed></Feed>
       </div>
       <div v-else-if="selectedTab === 'photos'">
         <!-- 显示用户的相册 -->
@@ -46,6 +47,7 @@
 import { ref } from 'vue'
 import { useUserStore } from '@/store/modules/user'
 import { message } from 'ant-design-vue'
+import Feed from './FeedView.vue'
 
 const selectedTab = ref('weibo')
 const userStore = useUserStore()
@@ -154,9 +156,9 @@ const handleChange = (info) => {
   margin-bottom: 20px;
 }
 
-.profile-content {
+/* .profile-content {
   background-color: #fff;
   border-radius: 8px;
   padding: 20px;
-}
+} */
 </style>
