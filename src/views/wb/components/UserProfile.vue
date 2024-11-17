@@ -2,13 +2,23 @@
   <div class="user-profile">
     <div class="cover-photo"></div>
     <div class="profile-info">
-      <img :src="user.avatar" alt="User Avatar" class="profile-avatar" />
-      <h1>{{ user.username }}</h1>
-      <p>{{ user.bio }}</p>
+      <a-upload
+        :show-upload-list="false"
+        :before-upload="beforeUpload"
+        @change="handleChange"
+        :customRequest="customRequest"
+        method="post"
+        action="http://localhost:8080/api/user/avatar"
+        :headers="headers"
+      >
+        <img :src="userStore.user.avatar" alt="User Avatar" class="profile-avatar" />
+      </a-upload>
+      <h1>{{ userStore.user.username }}</h1>
+      <p>{{ userStore.user.bio }}</p>
       <div class="user-stats">
-        <span>关注 {{ user.following }}</span>
-        <span>粉丝 {{ user.followers }}</span>
-        <span>文章 {{ user.posts }}</span>
+        <span>关注 {{ userStore.user.following }}</span>
+        <span>粉丝 {{ userStore.user.followers }}</span>
+        <span>文章 {{ userStore.user.posts }}</span>
       </div>
     </div>
     <nav class="profile-nav">
@@ -19,10 +29,8 @@
       </a-menu>
     </nav>
     <div class="profile-content">
-      <!-- 这里可以根据选中的标签显示不同的内容 -->
       <div v-if="selectedTab === 'weibo'">
         <!-- 使用修改后的 MidView 组件来显示用户的文章 -->
-        <!-- <MidView :userId="userId" /> -->
       </div>
       <div v-else-if="selectedTab === 'photos'">
         <!-- 显示用户的相册 -->
@@ -35,39 +43,73 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-// import { useRoute } from 'vue-router'
-// import MidView from './midView.vue'
+import { ref } from 'vue'
+import { useUserStore } from '@/store/modules/user'
+import { message } from 'ant-design-vue'
 
-// const route = useRoute()
-// const userId = route.params.userId
 const selectedTab = ref('weibo')
+const userStore = useUserStore()
+const headers = {
+  authorization: 'Bearer ' + userStore.user.access_token,
+}
 
-const user = ref({
-  username: '加载中...',
-  avatar: '/placeholder.svg?height=100&width=100',
-  bio: '',
-  following: 0,
-  followers: 0,
-  posts: 0,
-})
-
+// 选择标签事件
 const handleTabSelect = (item) => {
   selectedTab.value = item.key
 }
 
-onMounted(async () => {
-  // 这里应该从API获取用户数据
-  // 暂时使用模拟数据
-  user.value = {
-    username: '梦奴Q Q',
-    avatar: '/placeholder.svg?height=100&width=100',
-    bio: '这是用户简介',
-    following: 50,
-    followers: 47,
-    posts: 16,
+// 上传文件前的校验
+const beforeUpload = (file) => {
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
+  if (!isJpgOrPng) {
+    message.error('You can only upload JPG/PNG file!')
   }
-})
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isLt2M) {
+    message.error('Image must smaller than 2MB!')
+  }
+  return isJpgOrPng && isLt2M
+}
+
+// 自定义上传请求
+const customRequest = async ({ file, onSuccess, onError }) => {
+  const formData = new FormData()
+  formData.append('avatar', file)
+
+  try {
+    console.log('log.customRequest', userStore.accessToken)
+    const response = await fetch('http://localhost:8080/api/user/avatar', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + userStore.accessToken, // 手动设置请求头
+      },
+      body: formData,
+    })
+
+    const data = await response.json()
+
+    if (data.code === 0) {
+      userStore.user.avatar = data.data.path // 更新用户头像
+      onSuccess(data) // 上传成功
+    } else {
+      onError(new Error(data.message)) // 上传失败
+    }
+  } catch (error) {
+    onError(error) // 上传错误
+  }
+}
+
+// 文件上传状态变化的处理
+const handleChange = (info) => {
+  if (info.file.status === 'uploading') {
+    console.log('Uploading:', info.file.name)
+  }
+  if (info.file.status === 'done') {
+    message.success(`头像更新功能`)
+  } else if (info.file.status === 'error') {
+    message.error(`请稍后尝试`)
+  }
+}
 </script>
 
 <style scoped>
