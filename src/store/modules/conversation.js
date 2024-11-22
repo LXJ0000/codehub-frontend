@@ -69,10 +69,8 @@ export const useConversationStore = defineStore(
           offset: isScrollLoad ? this.conversationList.length : 0,
           count: 20,
         })
-        console.log('log.getConversationListSplit', data)
         const cves = data
         conversationList.value = [...(isScrollLoad ? this.conversationList : []), ...cves]
-        console.log(conversationList.value, '好友列表')
         return cves.length === 20
       } catch (error) {
         console.error(error)
