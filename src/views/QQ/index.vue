@@ -166,122 +166,132 @@ const filteredChats = computed(() => {
 </script>
 
 <template>
-  <NavView />
-  <div class="chat-interface">
-    <div class="sidebar">
-      <div class="search-bar">
-        <div class="search-container">
-          <a-input-search v-model:value="searchQuery" placeholder="搜索" />
-          <a-dropdown
-            v-model:open="showAddMenu"
-            trigger="click"
-            placement="bottomRight"
-            :getPopupContainer="(triggerNode) => triggerNode.parentNode"
+  <div class="app-container">
+    <NavView />
+    <div class="chat-interface">
+      <div class="sidebar">
+        <div class="search-bar">
+          <div class="search-container">
+            <a-input-search v-model:value="searchQuery" placeholder="搜索" />
+            <a-dropdown
+              v-model:open="showAddMenu"
+              trigger="click"
+              placement="bottomRight"
+              :getPopupContainer="(triggerNode) => triggerNode.parentNode"
+            >
+              <a-button class="add-button">
+                <PlusOutlined />
+              </a-button>
+              <template #overlay>
+                <a-menu @click="handleAddMenuClick">
+                  <a-menu-item key="createGroup">
+                    <span class="menu-item-content"> 创建群聊 </span>
+                  </a-menu-item>
+                  <a-menu-item key="addFriend">
+                    <span class="menu-item-content">
+                      <UserAddOutlined />
+                      加好友/群
+                    </span>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </div>
+        </div>
+        <div class="chat-list">
+          <div
+            v-for="chat in filteredChats"
+            :key="chat.id"
+            class="chat-item"
+            :class="{ selected: selectedChat === chat }"
+            @click="selectChat(chat)"
           >
-            <a-button class="add-button">
-              <PlusOutlined />
-            </a-button>
-            <template #overlay>
-              <a-menu @click="handleAddMenuClick">
-                <a-menu-item key="createGroup">
-                  <span class="menu-item-content"> 创建群聊 </span>
-                </a-menu-item>
-                <a-menu-item key="addFriend">
-                  <span class="menu-item-content">
-                    <UserAddOutlined />
-                    加好友/群
-                  </span>
-                </a-menu-item>
-              </a-menu>
-            </template>
-          </a-dropdown>
-        </div>
-      </div>
-      <div class="chat-list">
-        <div
-          v-for="chat in filteredChats"
-          :key="chat.id"
-          class="chat-item"
-          :class="{ selected: selectedChat === chat }"
-          @click="selectChat(chat)"
-        >
-          <a-avatar :src="chat.faceURL" />
-          <div class="chat-info">
-            <div class="chat-name">{{ chat.showName }}</div>
-            <div class="last-message">{{ chat.lastMessage }}</div>
-          </div>
-          <div class="chat-meta">
-            <div class="time">{{ chat.time }}</div>
-            <a-badge :count="chat.unread" :dot="chat.unread > 0" />
+            <a-avatar :src="chat.faceURL" />
+            <div class="chat-info">
+              <div class="chat-name">{{ chat.showName }}</div>
+              <div class="last-message">{{ chat.lastMessage }}</div>
+            </div>
+            <div class="chat-meta">
+              <div class="time">{{ chat.time }}</div>
+              <a-badge :count="chat.unread" :dot="chat.unread > 0" />
+            </div>
           </div>
         </div>
+        <div class="sidebar-footer">
+          <a-button class="settings-button" @click="toggleSettings">
+            <SettingOutlined />
+          </a-button>
+        </div>
       </div>
-      <div class="sidebar-footer">
-        <a-button class="settings-button" @click="toggleSettings">
-          <SettingOutlined />
-        </a-button>
+      <div class="main-content">
+        <div v-if="selectedChat" class="chat-header">
+          <div class="chat-title" @click="toggleUserProfile">
+            <span>{{ selectedChat.showName }}</span>
+          </div>
+          <div class="chat-actions">
+            <PhoneOutlined class="action-icon" @click="handleAction('Voice call')" />
+            <VideoCameraOutlined class="action-icon" @click="handleAction('Video call')" />
+            <DesktopOutlined class="action-icon" @click="handleAction('Screen share')" />
+            <MoreOutlined class="action-icon" @click="toggleMoreOptions" />
+          </div>
+        </div>
+        <div v-if="selectedChat" class="message-list" ref="messageListRef">
+          <div v-for="msg in messages" :key="msg.id" :class="['message', msg.sender]">
+            <a-avatar v-if="msg.sender === 'other'" :src="msg.avatar" class="message-avatar" />
+            <div class="message-bubble">
+              <div class="message-content">{{ msg.content }}</div>
+              <div class="message-time">{{ new Date(msg.time).toLocaleString() }}</div>
+            </div>
+            <a-avatar v-if="msg.sender === 'user'" :src="msg.avatar" class="message-avatar" />
+          </div>
+        </div>
+
+        <div v-if="selectedChat" class="message-input">
+          <div class="input-actions">
+            <SmileOutlined class="action-icon" @click="handleEmojiClick" />
+            <PictureOutlined class="action-icon" @click="toggleMediaUpload" />
+          </div>
+          <a-input
+            v-model:value="messageInput"
+            placeholder="输入消息..."
+            @pressEnter="sendMessage"
+          />
+          <a-button type="primary" @click="sendMessage">
+            <SendOutlined />
+          </a-button>
+        </div>
       </div>
+
+      <UserProfileDrawer v-model:open="showUserProfile" :selected-chat="selectedChat" />
+
+      <MoreOptionsDrawer v-model:open="showMoreOptions" @handle-action="handleAction" />
+
+      <SettingsDrawer v-model:open="showSettings" @handle-action="handleAction" />
+
+      <MediaUploadModal
+        v-model:open="showMediaUpload"
+        @upload-file="(file) => handleAction(`Uploaded file: ${file.name}`)"
+      />
+
+      <AddFriendModal v-model:open="showAddFriendModal" />
+
+      <CreateGroupModal v-model:open="showCreateGroupModal" />
     </div>
-    <div class="main-content">
-      <div v-if="selectedChat" class="chat-header">
-        <div class="chat-title" @click="toggleUserProfile">
-          <span>{{ selectedChat.showName }}</span>
-        </div>
-        <div class="chat-actions">
-          <PhoneOutlined class="action-icon" @click="handleAction('Voice call')" />
-          <VideoCameraOutlined class="action-icon" @click="handleAction('Video call')" />
-          <DesktopOutlined class="action-icon" @click="handleAction('Screen share')" />
-          <MoreOutlined class="action-icon" @click="toggleMoreOptions" />
-        </div>
-      </div>
-      <div v-if="selectedChat" class="message-list" ref="messageListRef">
-        <div v-for="msg in messages" :key="msg.id" :class="['message', msg.sender]">
-          <a-avatar v-if="msg.sender === 'other'" :src="msg.avatar" class="message-avatar" />
-          <div class="message-bubble">
-            <div class="message-content">{{ msg.content }}</div>
-            <div class="message-time">{{ new Date(msg.time).toLocaleString() }}</div>
-          </div>
-          <a-avatar v-if="msg.sender === 'user'" :src="msg.avatar" class="message-avatar" />
-        </div>
-      </div>
-
-      <div v-if="selectedChat" class="message-input">
-        <div class="input-actions">
-          <SmileOutlined class="action-icon" @click="handleEmojiClick" />
-          <PictureOutlined class="action-icon" @click="toggleMediaUpload" />
-        </div>
-        <a-input v-model:value="messageInput" placeholder="输入消息..." @pressEnter="sendMessage" />
-        <a-button type="primary" @click="sendMessage">
-          <SendOutlined />
-        </a-button>
-      </div>
-    </div>
-
-    <UserProfileDrawer v-model:open="showUserProfile" :selected-chat="selectedChat" />
-
-    <MoreOptionsDrawer v-model:open="showMoreOptions" @handle-action="handleAction" />
-
-    <SettingsDrawer v-model:open="showSettings" @handle-action="handleAction" />
-
-    <MediaUploadModal
-      v-model:open="showMediaUpload"
-      @upload-file="(file) => handleAction(`Uploaded file: ${file.name}`)"
-    />
-
-    <AddFriendModal v-model:open="showAddFriendModal" />
-
-    <CreateGroupModal v-model:open="showCreateGroupModal" />
   </div>
 </template>
 
 <style scoped>
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
 .chat-interface {
   display: flex;
-  /* height: 100vh; */
-  margin: 60px 0 0 0;
-  height: calc(100vh - 60px);
+  margin-top: 60px; /* 假设 NavView 的高度是 60px */
+  height: calc(100vh - 60px); /* 假设 NavView 的高度是 60px */
   overflow: hidden;
-
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     'Noto Sans', sans-serif;
 }

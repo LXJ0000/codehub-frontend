@@ -159,7 +159,7 @@ const loading = ref(false)
 const fetchPosts = async (page = 1) => {
   loading.value = true
   try {
-    const response = await api.fetchPosts(page)
+    const response = await api.fetchWriterPosts(page)
     // const response = await request('/post/reader', 'GET', { page, size: 10 })
     if (response.code === 0) {
       posts.value = response.data.post_list.map((item) => ({

@@ -10,6 +10,11 @@ export const fetchPosts = (page = 1, size = 10) => {
   return request('/post/reader', 'GET', { page, size })
 }
 
+// 获取本人帖子列表
+export const fetchWriterPosts = (page = 1, size = 10) => {
+  return request('/post/writer', 'GET', { page, size })
+}
+
 // 点赞动态
 export const likePost = (postId, isLike) => {
   return request('/post/like', 'POST', {
