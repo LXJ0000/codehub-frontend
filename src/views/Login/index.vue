@@ -136,7 +136,7 @@ const onFinish = async () => {
   try {
     await userStore.login(formState)
     message.success('登录成功!')
-    router.push('/dashboard')
+    router.push('/wb')
   } catch (error) {
     message.error('用户名或密码有误')
   } finally {

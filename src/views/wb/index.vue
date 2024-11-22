@@ -29,7 +29,10 @@ import RightView from './components/rightView.vue'
   min-height: 100vh;
   background: #f2f2f2;
 }
-
+::-webkit-scrollbar {
+  width: 0px; /* 垂直滚动条的宽度 */
+  height: 5px; /* 水平滚动条的高度 */
+}
 .main-container {
   display: flex;
   margin: 70px 150px 0;

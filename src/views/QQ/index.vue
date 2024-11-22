@@ -277,7 +277,11 @@ const filteredChats = computed(() => {
 <style scoped>
 .chat-interface {
   display: flex;
-  height: 100vh;
+  /* height: 100vh; */
+  margin: 60px 0 0 0;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     'Noto Sans', sans-serif;
 }

@@ -2,7 +2,11 @@
   <header class="top-nav">
     <div class="nav-content">
       <div class="left-section">
-        <img alt="悦联" class="logo" />
+        <img
+          alt="悦联"
+          class="logo"
+          src="https://tvax1.sinaimg.cn/crop.0.0.1079.1079.180/006UebRdly8hket8gaah4j30tz0tzmz2.jpg?KID=imgbed,tva&Expires=1731430147&ssig=4qtJVzbHnZ"
+        />
         <a-input-search v-model:value="searchText" placeholder="搜索悦联" class="search-input" />
       </div>
 
@@ -14,23 +18,21 @@
           class="nav-item"
           :class="{ active: currentPath === item.path }"
         >
-          <img
-            src="https://tvax1.sinaimg.cn/crop.0.0.1079.1079.180/006UebRdly8hket8gaah4j30tz0tzmz2.jpg?KID=imgbed,tva&Expires=1731430147&ssig=4qtJVzbHnZ"
-            class="nav-icon"
-            alt=""
-          />
+          <!-- <home-outlined /> -->
+          <span>{{ item.name }}</span>
+          <!-- <MessageSquare class="icon"/> -->
         </router-link>
       </div>
 
       <div class="right-section">
         <a-button type="primary" class="login-btn">登录</a-button>
         <a-button>注册</a-button>
-        <a-button class="icon-btn">
+        <!-- <a-button class="icon-btn">
           <Moon class="icon" />
         </a-button>
         <a-button class="icon-btn">
           <Edit class="icon" />
-        </a-button>
+        </a-button> -->
       </div>
     </div>
   </header>
@@ -39,7 +41,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { Home, Flame, Video, Mail, User, Moon, Edit } from 'lucide-vue-next'
+// import { Home, Flame, Video, Mail, User, Moon, Edit } from 'lucide-vue-next'
 
 const searchText = ref('')
 const route = useRoute()
@@ -47,11 +49,11 @@ const route = useRoute()
 const currentPath = computed(() => route.path)
 
 const navItems = [
-  { path: '/', icon: Home },
-  { path: '/hot', icon: Flame },
-  { path: '/video', icon: Video },
-  { path: '/messages', icon: Mail },
-  { path: '/profile', icon: User },
+  { path: '/wb', icon: 'Home', name: '首页' },
+  { path: '/qq', icon: 'Flame', name: '聊天' },
+  // { path: '/video', icon: Video, name: '私信' },
+  { path: '/ai', icon: 'Mail', name: 'AI' },
+  { path: '/profile', icon: 'User', name: '设置' },
 ]
 </script>
 
@@ -100,10 +102,13 @@ const navItems = [
 
 .nav-item {
   color: #666;
-  font-size: 20px;
+  font-size: 16px;
   padding: 8px;
   border-radius: 4px;
+  display: flex;
+  align-items: center;
   transition: all 0.3s;
+  text-decoration: none;
 }
 
 .nav-item:hover {

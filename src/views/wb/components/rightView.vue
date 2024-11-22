@@ -14,29 +14,38 @@
     </div>
     <div v-else class="profile-card">
       <div class="avatar">
-        <img :src="user.avatarUrl" alt="头像" class="profile-avatar" />
+        <img :src="user.avatar" alt="头像" class="profile-avatar" />
       </div>
       <div class="profile-header">
         <div class="profile-info">
-          <h4 class="profile-name">{{ user.username }}</h4>
-          <p class="profile-signature">{{ user.signature }}</p>
+          <h4 class="profile-name">{{ user.name }}</h4>
+          <p class="profile-signature">{{ user.about_me }}</p>
         </div>
       </div>
       <div class="profile-stats">
         <div class="profile-stat">
           <span class="stat-label">关注 </span>
-          <span class="stat-value">{{ user.following }}</span>
+          <span class="stat-value">{{ user.followingCount }}</span>
         </div>
         <div class="profile-stat">
           <span class="stat-label">粉丝 </span>
-          <span class="stat-value">{{ user.followers }}</span>
+          <span class="stat-value">{{ user.followerCount }}</span>
         </div>
         <div class="profile-stat">
           <span class="stat-label">帖子 </span>
-          <span class="stat-value">{{ user.posts }}</span>
+          <span class="stat-value">{{ user.postCount }}</span>
         </div>
       </div>
-      <a-button type="primary" block @click="logout">退出登录</a-button>
+      <a-button type="primary" block @click="showModal">退出登录</a-button>
+      <a-modal
+        v-model:open="open"
+        centered
+        title="确定要退出登录吗？"
+        @ok="handleLogout"
+        v-model:width="modalWidth"
+      >
+        <p>该操作不可撤销！</p>
+      </a-modal>
     </div>
 
     <div class="hot-topics">
@@ -64,19 +73,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RefreshCw } from 'lucide-vue-next'
+import { fetchUserInfo } from '@/services/api'
+import { useUserStore } from '@/store/modules/user'
+import { useRouter } from 'vue-router'
+import { message } from 'ant-design-vue'
 
+const userStore = useUserStore()
+const router = useRouter()
+const open = ref(false)
+const modalWidth = ref(300)
+const showModal = () => {
+  open.value = true
+}
+const handleLogout = async () => {
+  try {
+    await userStore.logout()
+    message.success('退出登录成功')
+    router.push('/login')
+  } catch (error) {
+    message.error(error.message || '退出登录失败，请重试')
+  }
+}
 const isLogin = ref(false)
-const user = ref({
-  username: '梦奴QQ',
-  avatarUrl:
-    'https://tvax1.sinaimg.cn/crop.0.0.1079.1079.180/006UebRdly8hket8gaah4j30tz0tzmz2.jpg?KID=imgbed,tva&Expires=1731430147&ssig=4qtJVzbHnZ',
-  signature: '这个人很懒，什么都没留下',
-  following: 11,
-  followers: 22,
-  posts: 66,
-})
+const user = ref({})
 const hotTopics = ref([
   { title: '杭州一宝马路口连撞多车', count: '57651' },
   { title: '李子柒回归', count: '下午趋势' },
@@ -89,6 +110,31 @@ const hotTopics = ref([
   { title: '停止这种AI视频', count: '213412' },
   { title: '李子柒停更原因', count: '21:24登顶' },
 ])
+
+const getUserInfo = async () => {
+  try {
+    const response = await fetchUserInfo()
+    // const response = await request('/user/profile', 'GET')
+    if (response.code === 0) {
+      user.value.followingCount = response.data.profile.relation_stat.followee
+      user.value.followerCount = response.data.profile.relation_stat.follower
+      user.value.postCount = response.data.profile.post_cnt
+      user.value.name = response.data.profile.nick_name
+        ? response.data.profile.nick_name
+        : response.data.profile.user_name
+      user.value.avatar = response.data.profile.avatar
+      user.value.birthday = response.data.profile.birthday
+      user.value.about_me = response.data.profile.about_me ? response.data.profile.about_me : '这个人很懒，什么都没留下'
+      user.value.email = response.data.profile.email
+      user.value.id = response.data.profile.relation_stat.user_id
+    }
+  } catch (error) {
+    console.error('Error fetching user info:', error)
+  }
+}
+onMounted(() => {
+  getUserInfo()
+})
 </script>
 
 <style scoped>
@@ -176,6 +222,7 @@ const hotTopics = ref([
   img {
     width: 150px;
     height: 150px;
+    border: 1px solid #d4ecf4;
   }
 }
 .profile-header {

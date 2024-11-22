@@ -8,7 +8,7 @@ router.beforeEach(async (to, from, next) => {
   const refreshToken = useUserStore().refreshToken
   const refreshTokenFunc = useUserStore().refreshTokenFunc
 
-  if (accessToken && (isTokenExpired(accessToken))) {
+  if (accessToken && isTokenExpired(accessToken)) {
     await refreshTokenFunc({ refresh_token: refreshToken })
   }
   if (accessToken) {

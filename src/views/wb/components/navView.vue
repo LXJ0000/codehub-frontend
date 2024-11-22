@@ -2,7 +2,11 @@
   <header class="top-nav">
     <div class="nav-content">
       <div class="left-section">
-        <img alt="悦联" class="logo" />
+        <img
+          alt="悦联"
+          class="logo"
+          src="https://tvax1.sinaimg.cn/crop.0.0.1079.1079.180/006UebRdly8hket8gaah4j30tz0tzmz2.jpg?KID=imgbed,tva&Expires=1731430147&ssig=4qtJVzbHnZ"
+        />
         <a-input-search v-model:value="searchText" placeholder="搜索悦联" class="search-input" />
       </div>
 
@@ -19,6 +23,7 @@
             class="nav-icon"
             alt=""
           />
+          <span>{{ item.icon }}</span>
         </router-link>
       </div>
 
