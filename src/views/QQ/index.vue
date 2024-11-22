@@ -63,37 +63,40 @@ onMounted(() => {
   console.log('log.onMounted.2')
 })
 
+// 修改 getConversationList 方法
 const getConversationList = async () => {
   await conversationStore.getConversationList()
-  chats.value = conversationStore.conversationList
+  chats.value = [friendNotification, ...conversationStore.conversationList]
   chats.value.forEach((item) => {
-    item.lastMessage = JSON.parse(item.latestMsg).textElem.content
-    item.time = new Date(item.latestMsgSendTime).toLocaleDateString()
-    item.unread = item.unreadCount
+    if (!item.isFriendNotification) {
+      item.lastMessage = JSON.parse(item.latestMsg).textElem.content
+      item.time = new Date(item.latestMsgSendTime).toLocaleDateString()
+      item.unread = item.unreadCount
+    }
   })
-  console.log('log.chats', JSON.parse(chats.value[0]))
 }
 
+// 修改 selectChat 方法
 const selectChat = async (chat) => {
   selectedChat.value = chat
-  console.log('log.selectChat.chat', chat)
+
+  if (chat.isFriendNotification) {
+    // 如果是好友通知会话，不需要获取消息历史
+    messages.value = []
+    return
+  }
+
+  // 原有的消息获取逻辑
   const data = await messageStore.getAdvancedHistoryMessageList(chat.conversationID)
-  console.log('log.selectChat.data', data)
-  console.log('log.selectChat.1', 1)
-  // 把 data 转换成 messages
   messages.value = data.map((item) => {
     return {
       id: item.clientMsgID || '',
       sender: item.sendID === userStore.userID ? 'user' : 'other',
       content: item.textElem?.content || '',
       time: item.sendTime || '',
-      avatar:
-        'http://localhost:10004/api/v1/buckets/user.avatar/objects/download?preview=true&prefix=OWQ3MWVjZDA5NTcxZjQyMWNhNzIyNmQyMzQxYjIxYy5qcGc=&version_id=null',
+      avatar: '/placeholder.svg?height=40&width=40',
     }
   })
-  console.log('log.selectChat.3', 3)
-
-  console.log('log.selectChat.3', messages.value)
 
   nextTick(() => {
     if (messageListRef.value) {
@@ -163,6 +166,54 @@ const filteredChats = computed(() => {
     chat.showName.toLowerCase().includes(searchQuery.value.toLowerCase()),
   )
 })
+
+// 新增好友请求相关数据
+const friendRequests = ref([
+  {
+    id: 1,
+    userID: 'user1',
+    nickname: '向阳、',
+    avatar: '/placeholder.svg?height=40&width=40',
+    addTime: '2024/06/25',
+    message: '请求添加对方为好友',
+    status: '等待验证',
+  },
+  {
+    id: 2,
+    userID: 'user2',
+    nickname: '好运连连',
+    avatar: '/placeholder.svg?height=40&width=40',
+    addTime: '2024/05/30',
+    message: '请求添加为好友',
+    status: '已同意',
+  },
+  // ... 更多好友请求数据
+])
+
+// 新增好友通知会话
+const friendNotification = {
+  id: 'friend-notification',
+  showName: '好友通知',
+  faceURL: '/placeholder.svg?height=40&width=40',
+  lastMessage: `${friendRequests.value.length}个新好友请求`,
+  time: new Date().toLocaleDateString(),
+  unread: friendRequests.value.length,
+  isFriendNotification: true, // 用于标识这是好友通知会话
+}
+
+// 处理好友请求的方法
+const handleFriendRequest = (requestId, action) => {
+  const request = friendRequests.value.find((req) => req.id === requestId)
+  if (request) {
+    if (action === 'accept') {
+      request.status = '已同意'
+      message.success('已同意好友请求')
+    } else if (action === 'reject') {
+      request.status = '已拒绝'
+      message.success('已拒绝好友请求')
+    }
+  }
+}
 </script>
 
 <template>
@@ -223,43 +274,96 @@ const filteredChats = computed(() => {
           </a-button>
         </div>
       </div>
-      <div class="main-content">
-        <div v-if="selectedChat" class="chat-header">
-          <div class="chat-title" @click="toggleUserProfile">
-            <span>{{ selectedChat.showName }}</span>
-          </div>
-          <div class="chat-actions">
-            <PhoneOutlined class="action-icon" @click="handleAction('Voice call')" />
-            <VideoCameraOutlined class="action-icon" @click="handleAction('Video call')" />
-            <DesktopOutlined class="action-icon" @click="handleAction('Screen share')" />
-            <MoreOutlined class="action-icon" @click="toggleMoreOptions" />
-          </div>
-        </div>
-        <div v-if="selectedChat" class="message-list" ref="messageListRef">
-          <div v-for="msg in messages" :key="msg.id" :class="['message', msg.sender]">
-            <a-avatar v-if="msg.sender === 'other'" :src="msg.avatar" class="message-avatar" />
-            <div class="message-bubble">
-              <div class="message-content">{{ msg.content }}</div>
-              <div class="message-time">{{ new Date(msg.time).toLocaleString() }}</div>
-            </div>
-            <a-avatar v-if="msg.sender === 'user'" :src="msg.avatar" class="message-avatar" />
-          </div>
-        </div>
 
-        <div v-if="selectedChat" class="message-input">
-          <div class="input-actions">
-            <SmileOutlined class="action-icon" @click="handleEmojiClick" />
-            <PictureOutlined class="action-icon" @click="toggleMediaUpload" />
-          </div>
-          <a-input
-            v-model:value="messageInput"
-            placeholder="输入消息..."
-            @pressEnter="sendMessage"
-          />
-          <a-button type="primary" @click="sendMessage">
-            <SendOutlined />
-          </a-button>
-        </div>
+      <div class="main-content">
+        <template v-if="selectedChat">
+          <!-- 好友通知界面 -->
+          <template v-if="selectedChat.isFriendNotification">
+            <div class="chat-header">
+              <div class="chat-title">
+                <span>好友通知</span>
+              </div>
+              <div class="chat-actions">
+                <a-button type="text">
+                  <template #icon><FilterOutlined /></template>
+                </a-button>
+                <a-button type="text">
+                  <template #icon><DeleteOutlined /></template>
+                </a-button>
+              </div>
+            </div>
+
+            <div class="friend-request-list">
+              <div v-for="request in friendRequests" :key="request.id" class="friend-request-item">
+                <div class="request-header">
+                  <a-avatar :size="40" :src="request.avatar" />
+                  <div class="request-info">
+                    <div class="request-name">{{ request.nickname }}</div>
+                    <div class="request-time">{{ request.addTime }}</div>
+                  </div>
+                  <div class="request-status" :class="request.status">
+                    <template v-if="request.status === '等待验证'">
+                      <a-button
+                        type="primary"
+                        size="small"
+                        @click="handleFriendRequest(request.id, 'accept')"
+                      >
+                        同意
+                      </a-button>
+                      <a-button size="small" @click="handleFriendRequest(request.id, 'reject')">
+                        拒绝
+                      </a-button>
+                    </template>
+                    <span v-else>{{ request.status }}</span>
+                  </div>
+                </div>
+                <div class="request-message">
+                  {{ request.message }}
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- 原有的聊天界面 -->
+          <template v-else>
+            <div class="chat-header">
+              <div class="chat-title" @click="toggleUserProfile">
+                <span>{{ selectedChat.showName }}</span>
+              </div>
+              <div class="chat-actions">
+                <PhoneOutlined class="action-icon" @click="handleAction('Voice call')" />
+                <VideoCameraOutlined class="action-icon" @click="handleAction('Video call')" />
+                <DesktopOutlined class="action-icon" @click="handleAction('Screen share')" />
+                <MoreOutlined class="action-icon" @click="toggleMoreOptions" />
+              </div>
+            </div>
+            <div class="message-list" ref="messageListRef">
+              <div v-for="msg in messages" :key="msg.id" :class="['message', msg.sender]">
+                <a-avatar v-if="msg.sender === 'other'" :src="msg.avatar" class="message-avatar" />
+                <div class="message-bubble">
+                  <div class="message-content">{{ msg.content }}</div>
+                  <div class="message-time">{{ new Date(msg.time).toLocaleString() }}</div>
+                </div>
+                <a-avatar v-if="msg.sender === 'user'" :src="msg.avatar" class="message-avatar" />
+              </div>
+            </div>
+
+            <div class="message-input">
+              <div class="input-actions">
+                <SmileOutlined class="action-icon" @click="handleEmojiClick" />
+                <PictureOutlined class="action-icon" @click="toggleMediaUpload" />
+              </div>
+              <a-input
+                v-model:value="messageInput"
+                placeholder="输入消息..."
+                @pressEnter="sendMessage"
+              />
+              <a-button type="primary" @click="sendMessage">
+                <SendOutlined />
+              </a-button>
+            </div>
+          </template>
+        </template>
       </div>
 
       <UserProfileDrawer v-model:open="showUserProfile" :selected-chat="selectedChat" />
@@ -497,5 +601,62 @@ const filteredChats = computed(() => {
 
 .message-list::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
+}
+
+/* 新增好友请求列表样式 */
+.friend-request-list {
+  padding: 16px;
+  overflow-y: auto;
+  height: calc(100% - 64px);
+}
+
+.friend-request-item {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.request-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.request-info {
+  margin-left: 12px;
+  flex-grow: 1;
+}
+
+.request-name {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.request-time {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+.request-status {
+  display: flex;
+  gap: 8px;
+}
+
+.request-status.已同意 {
+  color: #52c41a;
+}
+
+.request-status.已拒绝 {
+  color: #ff4d4f;
+}
+
+.request-message {
+  color: #666;
+  font-size: 14px;
+  margin-top: 8px;
+  padding-left: 52px;
 }
 </style>
