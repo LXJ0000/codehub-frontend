@@ -13,18 +13,27 @@
         <img :src="post.image" alt="Post Image" />
       </div>
       <div class="post-actions">
-        <!-- <button><MessageSquare style="height: 16px" /> {{ post.comments }}</button> -->
-        <!-- <button><Repeat2 style="height: 16px" /> {{ post.reposts }}</button> -->
-        <button><MessageSquare style="height: 16px" /> 0</button>
-        <button><Repeat2 style="height: 16px" /> 0</button>
-        <button><Heart style="height: 16px" /> {{ post.likeCount }}</button>
+        <button @click="likePost(post)">
+          <component :is="post.liked ? 'HeartFilled' : 'HeartOutlined'" />
+          <span>{{ post.likeCount }}</span>
+        </button>
+        <button @click="collectPost(post)">
+          <component :is="post.collected ? 'StarFilled' : 'StarOutlined'" />
+          <span>{{ post.collectCount }}</span>
+        </button>
+        <button @click="sharePost(post)">
+          <ShareAltOutlined />
+          <span>分享</span>
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { MessageSquare, Repeat2, Heart } from 'lucide-vue-next'
+import { message } from 'ant-design-vue'
+import { defineProps } from 'vue'
+import * as api from '@/services/api'
 
 const { posts } = defineProps({
   posts: {
@@ -33,7 +42,36 @@ const { posts } = defineProps({
   },
 })
 
-console.log('log.posts', posts)
+const likePost = async (post) => {
+  try {
+    const response = await api.likePost(post.id, !post.liked)
+    if (response.code === 0) {
+      post.liked = !post.liked
+      post.likeCount += post.liked ? 1 : -1
+      message.success(post.liked ? '点赞成功' : '取消点赞成功')
+    }
+  } catch (error) {
+    console.error('Error liking post:', error)
+  }
+}
+
+const collectPost = async (post) => {
+  try {
+    const response = await api.collectPost(post.id, !post.collected)
+    if (response.code === 0) {
+      post.collected = !post.collected
+      post.collectCount += post.collected ? 1 : -1
+      message.success(post.collected ? '收藏成功' : '取消收藏成功')
+    }
+  } catch (error) {
+    console.error('Error collecting post:', error)
+  }
+}
+
+const sharePost = (post) => {
+  console.log('Sharing post:', post)
+  message.info('分享功能暂未实现')
+}
 </script>
 
 <style scoped>
