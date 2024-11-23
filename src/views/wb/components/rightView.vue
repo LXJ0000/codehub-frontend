@@ -36,7 +36,9 @@
           <span class="stat-value">{{ user.postCount }}</span>
         </div>
       </div>
-      <a-button type="primary" block @click="showModal">退出登录</a-button>
+      <a-button type="primary" block @click="showModal" style="border-radius: 16px"
+        >退出登录</a-button
+      >
       <a-modal
         v-model:open="open"
         centered
@@ -51,9 +53,9 @@
     <div class="hot-topics">
       <div class="topics-header">
         <h3>悦联热搜</h3>
-        <a-button type="link" class="refresh-btn">
+        <a-button type="link" class="refresh-btn" style="border-radius: 16px">
           <RefreshCw class="refresh-icon" />
-          点击刷新
+          刷新
         </a-button>
       </div>
 

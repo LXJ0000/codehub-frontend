@@ -91,7 +91,7 @@ const handleLogout = async () => {
                 </router-link>
               </a-menu-item>
               <a-menu-divider />
-              <a-menu-item key="3" @click="handleLogout">
+              <a-menu-item key="3" @click="handleLogout" style="border-radius: 16px">
                 <LogoutOutlined />
                 退出登录
               </a-menu-item>
