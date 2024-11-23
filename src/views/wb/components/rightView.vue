@@ -13,7 +13,7 @@
       </div>
     </div>
     <div v-else class="profile-card">
-      <div class="avatar">
+      <div class="avatar" @click="goToUserProfile">
         <img :src="user.avatar" alt="头像" class="profile-avatar" />
       </div>
       <div class="profile-header">
@@ -124,7 +124,9 @@ const getUserInfo = async () => {
         : response.data.profile.user_name
       user.value.avatar = response.data.profile.avatar
       user.value.birthday = response.data.profile.birthday
-      user.value.about_me = response.data.profile.about_me ? response.data.profile.about_me : '这个人很懒，什么都没留下'
+      user.value.about_me = response.data.profile.about_me
+        ? response.data.profile.about_me
+        : '这个人很懒，什么都没留下'
       user.value.email = response.data.profile.email
       user.value.id = response.data.profile.relation_stat.user_id
     }
@@ -132,6 +134,11 @@ const getUserInfo = async () => {
     console.error('Error fetching user info:', error)
   }
 }
+
+const goToUserProfile = () => {
+  router.push(`wb/u/${userStore.user.user_id}`)
+}
+
 onMounted(() => {
   getUserInfo()
 })
