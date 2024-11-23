@@ -49,11 +49,11 @@ const route = useRoute()
 const currentPath = computed(() => route.path)
 
 const navItems = [
-  { path: '/wb', icon: 'Home', name: '首页' },
-  { path: '/qq', icon: 'Flame', name: '聊天' },
+  { path: '/wb', name: '首页' },
+  { path: '/qq', name: '聊天' },
   // { path: '/video', icon: Video, name: '私信' },
-  { path: '/ai', icon: 'Mail', name: 'AI' },
-  { path: '/profile', icon: 'User', name: '设置' },
+  { path: '/chat', name: 'AI' },
+  { path: '/profile', name: '设置' },
 ]
 </script>
 
