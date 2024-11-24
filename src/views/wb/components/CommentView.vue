@@ -45,30 +45,35 @@
     <!-- 评论列表 -->
     <div class="comments-list">
       <div
-        v-for="(comment, commentIndex) in sortedComments"
-        :key="commentIndex"
-        class="comment-item"
+        v-for="(comment, index) in sortedComments"
+        :key="comment.comment_id"
+        :class="{ 'comment-item': true, 'last-item': index === sortedComments.length - 1 }"
       >
-        <img :src="comment.avatar" alt="Commenter Avatar" class="comment-avatar" />
+        <img :src="comment.user_profile.avatar" alt="Commenter Avatar" class="comment-avatar" />
         <div class="comment-content">
           <div class="comment-header">
-            <span class="comment-username">{{ comment.username }}</span>
-            <span class="comment-location">来自{{ comment.location }}</span>
+            <span class="comment-username">
+              {{ comment.user_profile.nick_name || comment.user_profile.user_name }}
+            </span>
           </div>
           <p class="comment-text">{{ comment.content }}</p>
           <div class="comment-footer">
-            <span class="comment-time">{{ comment.time }}</span>
+            <span class="comment-time">{{ formatTime(comment.created_at) }}</span>
             <div class="comment-actions">
-              <button class="action-btn" @click="toggleReplyInput(comment)">回复</button>
-              <button class="action-btn" @click="toggleReplyList(comment)">
-                <span class="reply-count">{{ comment.replyCount }}条回复</span>
+              <button
+                v-if="comment.reply_count"
+                class="action-btn"
+                @click="toggleReplyList(comment)"
+              >
+                <span class="reply-count">{{ comment.reply_count }}条回复</span>
               </button>
+              <button class="action-btn" @click="toggleReplyInput(comment)">回复</button>
               <button class="action-btn">
                 <ShareAltOutlined />
               </button>
               <button class="action-btn" @click="likeComment(comment)">
-                <LikeOutlined />
-                <span>{{ formatNumber(comment.likes) }}</span>
+                <component :is="comment.liked ? 'LikeFilled' : 'LikeOutlined'" />
+                <span>{{ formatNumber(comment.like_cnt) }}</span>
               </button>
             </div>
           </div>
@@ -97,27 +102,25 @@
 
           <!-- 回复列表 -->
           <div v-if="comment.showReplies" class="reply-list">
-            <div
-              v-for="(reply, replyIndex) in comment.replies"
-              :key="replyIndex"
-              class="reply-item"
-            >
-              <img :src="reply.avatar" alt="Replier Avatar" class="reply-avatar" />
+            <div v-for="reply in comment.replies" :key="reply.comment_id" class="reply-item">
+              <img :src="userStore.user.avatar" alt="Replier Avatar" class="reply-avatar" />
               <div class="reply-content">
                 <div class="reply-header">
-                  <span class="reply-username">{{ reply.username }}</span>
-                  <span class="reply-location">来自{{ reply.location }}</span>
+                  <span class="reply-username">
+                    {{ userStore.user.nick_name || userStore.user.user_name }}
+                  </span>
                 </div>
                 <p class="reply-text">{{ reply.content }}</p>
                 <div class="reply-footer">
-                  <span class="reply-time">{{ reply.time }}</span>
+                  <span class="reply-time">{{ formatTime(reply.created_at) }}</span>
                   <div class="reply-actions">
                     <button class="action-btn">
                       <ShareAltOutlined />
                     </button>
-                    <button class="action-btn" @click="likeReply(comment, reply)">
-                      <LikeOutlined />
-                      <span>{{ formatNumber(reply.likes) }}</span>
+                    <button class="action-btn" @click="likeComment(reply)">
+                      <!-- <LikeOutlined /> -->
+                      <component :is="reply.liked ? 'LikeFilled' : 'LikeOutlined'" />
+                      <span>{{ formatNumber(reply.like_cnt) }}</span>
                     </button>
                   </div>
                 </div>
@@ -129,26 +132,26 @@
     </div>
 
     <!-- 查看更多评论 -->
-    <button class="view-more-btn" @click="loadMoreComments">
-      查看全部 {{ formatNumber(totalComments) }}条评论
+    <button
+      v-if="totalComments - sortedComments.length"
+      class="view-more-btn"
+      @click="loadMoreComments"
+    >
+      <!-- 查看全部 {{ formatNumber(totalComments) }}条评论 -->
+      查看剩余 {{ totalComments - sortedComments.length }} 条评论
     </button>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watchEffect } from 'vue'
 import { message } from 'ant-design-vue'
-import {
-  SmileOutlined,
-  PictureOutlined,
-  ShareAltOutlined,
-  LikeOutlined,
-} from '@ant-design/icons-vue'
 import { useUserStore } from '@/store/modules/user'
+import * as api from '@/services/api'
 
 const userStore = useUserStore()
 
-const props = defineProps({
+const { comments, totalComments, postId } = defineProps({
   comments: {
     type: Array,
     default: () => [],
@@ -157,44 +160,82 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  postId: {
+    type: String,
+    required: true,
+  },
 })
 
-const emit = defineEmits(['update:comments', 'load-more'])
+const emit = defineEmits(['load-more'])
 
-const currentSort = ref('hot')
+const currentSort = ref('asc')
 const sortOptions = [
-  { label: '按倒序', value: 'desc' },
-  { label: '按正序', value: 'asc' },
+  // { label: '按时间', value: 'desc' },
+  { label: '按时间', value: 'asc' },
   { label: '按热度', value: 'hot' },
 ]
 const newComment = ref('')
 
 const formatNumber = (num) => {
+  if (num == null) {
+    return '0'
+  }
   if (num >= 10000) {
     return (num / 10000).toFixed(1) + '万'
   }
   return num.toString()
 }
 
+const formatTime = (timestamp) => {
+  const date = new Date(timestamp * 1000)
+  return date.toLocaleString()
+}
+
 const changeSort = (sortType) => {
   currentSort.value = sortType
 }
 
+const localComments = ref([])
+
+watchEffect(() => {
+  localComments.value = comments.map((comment) => ({
+    ...comment,
+    showReplies: false,
+    showReplyInput: false,
+    newReply: '',
+    replies: [],
+  }))
+})
+
 const sortedComments = computed(() => {
-  const sorted = [...props.comments]
+  const sorted = [...localComments.value]
   switch (currentSort.value) {
     case 'desc':
       return sorted.reverse()
     case 'asc':
       return sorted
     case 'hot':
-      return sorted.sort((a, b) => b.likes - a.likes)
+      return sorted.sort((a, b) => b.like_cnt - a.like_cnt)
     default:
       return sorted
   }
 })
 
-const toggleReplyList = (comment) => {
+const toggleReplyList = async (comment) => {
+  console.log('log.toggleReplyList:', comment)
+  if (!comment.replies.length) {
+    try {
+      const response = await api.fetchSecondComments(postId, comment.comment_id)
+      if (response.code === 0) {
+        comment.replies = response.data.comment_list
+      } else {
+        message.error('获取回复失败')
+      }
+    } catch (error) {
+      console.error('Error fetching replies:', error)
+      message.error('获取回复失败')
+    }
+  }
   comment.showReplies = !comment.showReplies
 }
 
@@ -205,61 +246,78 @@ const toggleReplyInput = (comment) => {
   }
 }
 
-const submitComment = () => {
+const submitComment = async () => {
   if (!newComment.value.trim()) return
 
-  const comment = {
-    id: Date.now(),
-    username: '当前用户',
-    avatar: userStore.user.value,
-    content: newComment.value.trim(),
-    time: new Date().toLocaleString(),
-    location: '未知',
-    likes: 0,
-    replyCount: 0,
-    replies: [],
-    showReplies: false,
-    showReplyInput: false,
+  try {
+    const response = await api.submitComment(postId, newComment.value.trim())
+    if (response.code === 0) {
+      localComments.value.unshift({
+        ...response.data.comment_detail,
+        showReplies: false,
+        showReplyInput: false,
+        newReply: '',
+        replies: [],
+        user_profile: userStore.user,
+      })
+      message.success('评论成功')
+      newComment.value = ''
+      addTotalComment()
+    } else {
+      message.error('评论失败')
+    }
+  } catch (error) {
+    message.error('评论失败')
   }
-
-  emit('update:comments', [comment, ...props.comments])
-  newComment.value = ''
-  message.success('评论成功')
 }
 
-const submitReply = (comment) => {
+const submitReply = async (comment) => {
   if (!comment.newReply?.trim()) return
-
-  const reply = {
-    id: Date.now(),
-    username: '当前用户',
-    avatar: userStore.user.avatar,
-    content: comment.newReply.trim(),
-    time: new Date().toLocaleString(),
-    location: '未知',
-    likes: 0,
+  try {
+    const response = await api.submitSecondComment(
+      postId,
+      comment.newReply.trim(),
+      comment.comment_id,
+    )
+    if (response.code === 0) {
+      if (!comment.replies) {
+        comment.replies = []
+      }
+      comment.replies.unshift(response.data.comment_detail)
+      comment.reply_count += 1
+      comment.showReplyInput = false
+      comment.showReplies = true
+      comment.newReply = ''
+      message.success('回复成功')
+    } else {
+      message.error('回复失败')
+    }
+  } catch (error) {
+    console.error('Error submitting reply:', error)
+    message.error('回复失败')
   }
-
-  comment.replies.unshift(reply)
-  comment.replyCount += 1
-  comment.showReplyInput = false
-  comment.newReply = ''
-  emit('update:comments', [...props.comments])
-  message.success('回复成功')
 }
 
-const likeComment = (comment) => {
-  comment.likes += 1
-  emit('update:comments', [...props.comments])
-}
-
-const likeReply = (comment, reply) => {
-  reply.likes += 1
-  emit('update:comments', [...props.comments])
+const likeComment = async (comment) => {
+  try {
+    const response = await api.likeComment(comment.comment_id, !comment.liked)
+    if (response.code === 0) {
+      comment.liked = !comment.liked
+      comment.like_cnt += comment.liked ? 1 : -1
+      message.success(comment.liked ? '点赞成功' : '取消点赞成功')
+    }
+  } catch (error) {
+    console.error('Error liking comment', error)
+    message.error('请稍后重试')
+  }
 }
 
 const loadMoreComments = () => {
   emit('load-more')
+}
+
+const addTotalComment = () => {
+  emit('add-total-comment')
 }
 </script>
 
@@ -355,6 +413,11 @@ const loadMoreComments = () => {
   gap: 12px;
   padding: 12px 0;
   border-bottom: 1px solid #f0f0f0;
+}
+
+.comment-item.last-item {
+  /* TODO 要不要删除这个 */
+  border-bottom: none;
 }
 
 .comment-content {
@@ -459,7 +522,7 @@ const loadMoreComments = () => {
 
 .reply-list {
   margin-top: 12px;
-  margin-left: 44px;
+  margin-left: 0px;
   border-left: 2px solid #f0f0f0;
   padding-left: 12px;
 }

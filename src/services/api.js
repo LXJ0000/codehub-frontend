@@ -36,16 +36,19 @@ export const fetchWriterPosts = (page = 1, size = 10) => {
 
 // 点赞动态
 export const likePost = (postId, isLike) => {
-  return request('/post/like', 'POST', {
-    post_id: postId,
+  return request('/intr/like', 'POST', {
+    biz: 'post',
+    biz_id: postId,
     is_like: isLike,
   })
 }
 
 // 收藏动态
 export const collectPost = (postId, isCollect) => {
-  return request('/post/collect', 'POST', {
-    post_id: postId,
+  return request('/intr/collect', 'POST', {
+    biz: 'post',
+    biz_id: postId,
+    // post_id: postId,
     is_collect: isCollect,
     collection_id: 0, // 默认只有一个收藏夹 id 为 0
   })
@@ -59,4 +62,55 @@ export const submitPost = (content, title = 'title', status = 'publish', abstrac
 // 发布新内容（用于模态框提交）
 export const submitNewPost = (postData) => {
   return request('/post', 'POST', postData)
+}
+
+// 发表一级评论
+export const submitComment = (postId, content) => {
+  return request('/comment', 'POST', { biz: 'post', biz_id: postId, content: content })
+}
+
+// 回复一级评论
+export const submitSecondComment = (postId, content, parentId) => {
+  return request('/comment', 'POST', {
+    biz: 'post',
+    biz_id: postId,
+    content: content,
+    parent_id: parentId,
+  })
+}
+
+// 回复某个二级评论
+export const submitSecondToUserComment = (postId, content, parentId, userId) => {
+  return request('/comment', 'POST', {
+    biz: 'post',
+    biz_id: postId,
+    content: content,
+    parent_id: parentId,
+    to_user_id: userId,
+  })
+}
+
+// 获取一级评论列表
+export const fetchFirstComments = (postId, min_id = '0', limit = 3) => {
+  return request('/comment.list', 'POST', { biz: 'post', biz_id: postId, min_id, limit })
+}
+
+// 获取二级评论列表
+export const fetchSecondComments = (postId, parent_id, min_id = '0', limit = 3) => {
+  return request('/comment.list', 'POST', {
+    biz: 'post',
+    biz_id: postId,
+    parent_id: parent_id,
+    min_id,
+    limit,
+  })
+}
+
+// 点赞评论
+export const likeComment = (commentId, isLike) => {
+  return request('/intr/like', 'POST', {
+    biz: 'comment',
+    biz_id: commentId,
+    is_like: isLike,
+  })
 }

@@ -19,7 +19,7 @@
         </button>
         <button @click="toggleComments(post)">
           <CommentOutlined style="font-size: 14px" />
-          <span>{{ post.commentCount || 0 }}</span>
+          <span>{{ post.comment_count || 0 }}</span>
         </button>
         <button @click="collectPost(post)">
           <component :is="post.collected ? 'StarFilled' : 'StarOutlined'" style="font-size: 14px" />
@@ -34,9 +34,11 @@
       <!-- 评论区域 -->
       <CommentView
         v-if="post.showComments"
-        v-model:comments="post.comments"
+        :comments="post.comments"
         :total-comments="post.totalComments"
+        :post-id="post.id"
         @load-more="loadMoreComments(post)"
+        @add-total-comment="post.totalComments += 1"
       />
     </div>
   </div>
@@ -54,38 +56,21 @@ const { posts } = defineProps({
   },
 })
 
-const toggleComments = (post) => {
+const toggleComments = async (post) => {
   post.showComments = !post.showComments
   if (!post.comments) {
-    post.comments = [
-      {
-        id: 1,
-        username: '晶兽',
-        avatar: '/placeholder.svg?height=40&width=40',
-        content: '然后不知道假假死的一方真死了，罗密欧与朱丽叶',
-        time: '24-11-23 11:38',
-        location: '北京',
-        likes: 33000,
-        replyCount: 339,
-        replies: [],
-        showReplies: false,
-        showReplyInput: false,
-      },
-      {
-        id: 2,
-        username: '咕咕咕之水',
-        avatar: '/placeholder.svg?height=40&width=40',
-        content: '神夏福华😊',
-        time: '24-11-23 12:06',
-        location: '广东',
-        likes: 29000,
-        replyCount: 154,
-        replies: [],
-        showReplies: false,
-        showReplyInput: false,
-      },
-    ]
-    post.totalComments = 177000
+    try {
+      const response = await api.fetchFirstComments(post.id)
+      if (response.code === 0) {
+        post.comments = response.data.comment_list
+        console.log('log.post.comments:', post.comments)
+        post.totalComments = response.data.count
+      } else {
+        message.error('获取评论失败')
+      }
+    } catch (error) {
+      message.error('获取评论失败')
+    }
   }
 }
 
@@ -98,7 +83,7 @@ const likePost = async (post) => {
       message.success(post.liked ? '点赞成功' : '取消点赞成功')
     }
   } catch (error) {
-    console.error('Error liking post:', error)
+    message.error('操作失败')
   }
 }
 
@@ -112,6 +97,7 @@ const collectPost = async (post) => {
     }
   } catch (error) {
     console.error('Error collecting post:', error)
+    message.error('操作失败')
   }
 }
 
@@ -120,8 +106,21 @@ const sharePost = (post) => {
   message.info('分享功能暂未实现')
 }
 
-const loadMoreComments = (post) => {
-  message.info('log.loading more comment...', post)
+const loadMoreComments = async (post) => {
+  try {
+    const lastComment = post.comments[post.comments.length - 1]
+    console.log('Loading more comments:', lastComment)
+    const response = await api.fetchFirstComments(post.id, lastComment.comment_id)
+    if (response.code === 0) {
+      post.comments = [...post.comments, ...response.data.comment_list]
+      post.totalComments = response.data.count
+    } else {
+      message.error('加载更多评论失败')
+    }
+  } catch (error) {
+    console.log('log.loadMoreComments.error', error)
+    message.error('加载更多评论失败')
+  }
 }
 </script>
 

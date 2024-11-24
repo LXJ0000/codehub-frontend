@@ -78,6 +78,7 @@ const fetchPosts = async (page = 1) => {
         authorName: item.post.author.nick_name
           ? item.post.author.nick_name
           : item.post.author.user_name,
+        comment_count: item.comment_count,
       }))
       // 更新分页信息
       pagination.total = response.data.count
