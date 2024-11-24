@@ -7,6 +7,11 @@ export const fetchUserInfo = () => {
   return request('/user/profile', 'GET')
 }
 
+// 获取用户信息
+export const getUserInfo = (user_id) => {
+  return request('/user', 'GET', { user_id })
+}
+
 // 搜索用户：关键字模糊查询
 export const searchPosts = (query) => {
   return request('/search', 'GET', { query })
@@ -25,8 +30,9 @@ export const batchGetUserInfo = (userIds) => {
 // === 帖子相关接口 ===
 
 // 获取用户动态列表
-export const fetchPosts = (page = 1, size = 10) => {
-  return request('/post/reader', 'GET', { page, size })
+export const fetchPosts = (author_id = 0, page = 1, size = 10) => {
+  console.log('log.fetchPosts', author_id, page, size)
+  return request('/post/reader', 'GET', { author_id, page, size })
 }
 
 // 获取本人帖子列表

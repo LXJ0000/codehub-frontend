@@ -14,7 +14,12 @@
 
     <!-- 评论输入框 -->
     <div class="comment-input-section">
-      <img :src="userStore.user.avatar" alt="Current User Avatar" class="comment-avatar" />
+      <img
+        @click="goToUserProfile(userStore.user.user_id)"
+        :src="userStore.user.avatar"
+        alt="Current User Avatar"
+        class="comment-avatar"
+      />
       <div class="comment-input-wrapper">
         <input
           v-model="newComment"
@@ -49,7 +54,12 @@
         :key="comment.comment_id"
         :class="{ 'comment-item': true, 'last-item': index === sortedComments.length - 1 }"
       >
-        <img :src="comment.user_profile.avatar" alt="Commenter Avatar" class="comment-avatar" />
+        <img
+          @click="goToUserProfile(comment.user_profile.user_id)"
+          :src="comment.user_profile.avatar"
+          alt="Commenter Avatar"
+          class="comment-avatar"
+        />
         <div class="comment-content">
           <div class="comment-header">
             <span class="comment-username">
@@ -80,7 +90,12 @@
 
           <!-- 回复输入框 -->
           <div v-if="comment.showReplyInput" class="reply-input-section">
-            <img :src="userStore.user.avatar" alt="Current User Avatar" class="reply-avatar" />
+            <img
+              @click="goToUserProfile(userStore.user.user_id)"
+              :src="userStore.user.avatar"
+              alt="Current User Avatar"
+              class="reply-avatar"
+            />
             <div class="reply-input-wrapper">
               <input
                 v-model="comment.newReply"
@@ -103,11 +118,16 @@
           <!-- 回复列表 -->
           <div v-if="comment.showReplies" class="reply-list">
             <div v-for="reply in comment.replies" :key="reply.comment_id" class="reply-item">
-              <img :src="userStore.user.avatar" alt="Replier Avatar" class="reply-avatar" />
+              <img
+                @click="goToUserProfile(reply.user_profile.user_id)"
+                :src="reply.user_profile.avatar"
+                alt="Replier Avatar"
+                class="reply-avatar"
+              />
               <div class="reply-content">
                 <div class="reply-header">
                   <span class="reply-username">
-                    {{ userStore.user.nick_name || userStore.user.user_name }}
+                    {{ reply.user_profile.nick_name || reply.user_profile.user_name }}
                   </span>
                 </div>
                 <p class="reply-text">{{ reply.content }}</p>
@@ -283,7 +303,11 @@ const submitReply = async (comment) => {
       if (!comment.replies) {
         comment.replies = []
       }
-      comment.replies.unshift(response.data.comment_detail)
+      comment.replies.unshift({
+        ...response.data.comment_detail,
+        user_profile: userStore.user,
+        to_user_profile: response.data.to_user_profile,
+      })
       comment.reply_count += 1
       comment.showReplyInput = false
       comment.showReplies = true
@@ -318,6 +342,13 @@ const loadMoreComments = () => {
 
 const addTotalComment = () => {
   emit('add-total-comment')
+}
+
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
+const goToUserProfile = (userId) => {
+  router.push(`/wb/u/${userId}`)
 }
 </script>
 

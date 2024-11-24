@@ -11,14 +11,14 @@
         action="http://localhost:8080/api/user/avatar"
         :headers="headers"
       >
-        <img :src="userStore.user.avatar" alt="User Avatar" class="profile-avatar" />
+        <img :src="currentUser.avatar" alt="User Avatar" class="profile-avatar" />
       </a-upload>
-      <h1>{{ userStore.user.username }}</h1>
-      <p>{{ userStore.user.bio }}</p>
+      <h1>{{ currentUser.username }}</h1>
+      <p>{{ currentUser.bio }}</p>
       <div class="user-stats">
-        <span>关注 {{ userStore.user.following }}</span>
-        <span>粉丝 {{ userStore.user.followers }}</span>
-        <span>文章 {{ userStore.user.posts }}</span>
+        <span>关注 {{ currentUser.following }}</span>
+        <span>粉丝 {{ currentUser.followers }}</span>
+        <span>文章 {{ currentUser.posts }}</span>
       </div>
     </div>
     <nav class="profile-nav">
@@ -125,11 +125,16 @@ const handleChange = (info) => {
     message.error('请稍后重试')
   }
 }
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const fetchUserInfo = async () => {
+  // 获取路由的用户 ID /wb/u/:userId
+  const userId = route.params.userid
   try {
-    const response = await api.fetchUserInfo()
-    // const response = await request('/user/profile', 'GET')
+    const response = await api.getUserInfo(userId)
+    console.log('log.response:', response)
     if (response.code === 0) {
       currentUser.value.followingCount = response.data.profile.relation_stat.followee
       currentUser.value.followerCount = response.data.profile.relation_stat.follower
@@ -141,8 +146,9 @@ const fetchUserInfo = async () => {
       currentUser.value.birthday = response.data.profile.birthday
       currentUser.value.about_me = response.data.profile.about_me
       currentUser.value.email = response.data.profile.email
-      currentUser.value.id = response.data.profile.relation_stat.user_id
+      currentUser.value.id = response.data.profile.user_id
     }
+    console.log('log.currentUser:', currentUser.value.id)
   } catch (error) {
     console.error('Error fetching user info:', error)
   }
@@ -157,12 +163,18 @@ const pagination = {
 const loading = ref(false)
 
 const fetchPosts = async (page = 1) => {
+  console.log('log.currentUser:', currentUser.value.id)
+
   loading.value = true
   try {
-    const response = await api.fetchWriterPosts(page)
-    // const response = await request('/post/reader', 'GET', { page, size: 10 })
-    if (response.code === 0) {
-      posts.value = response.data.post_list.map((item) => ({
+    let response = ref()
+    if (currentUser.value.id === userStore.user.user_id) {
+      response.value = await api.fetchWriterPosts(page)
+    } else {
+      response.value = await api.fetchPosts(currentUser.value.id, page)
+    }
+    if (response.value.code === 0) {
+      posts.value = response.value.data.post_list.map((item) => ({
         id: item.post.post_id,
         title: item.post.title,
         content: item.post.content,
@@ -184,7 +196,7 @@ const fetchPosts = async (page = 1) => {
         comment_count: item.comment_count,
       }))
       // 更新分页信息
-      pagination.total = response.data.count
+      pagination.total = response.value.data.count
     }
   } catch (error) {
     console.error('Error fetching posts:', error)
@@ -193,8 +205,8 @@ const fetchPosts = async (page = 1) => {
   }
 }
 
-onMounted(() => {
-  fetchUserInfo()
+onMounted(async () => {
+  await fetchUserInfo()
   fetchPosts()
 })
 </script>

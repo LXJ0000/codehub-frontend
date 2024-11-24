@@ -2,7 +2,12 @@
   <div class="feed">
     <div v-for="(post, index) in posts" :key="index" class="post-card">
       <div class="post-header">
-        <img :src="post.authorAvatar" alt="User Avatar" class="avatar" />
+        <img
+          @click="goToUserProfile(post.authorId)"
+          :src="post.authorAvatar"
+          alt="User Avatar"
+          class="avatar"
+        />
         <div class="user-info">
           <h3>{{ post.authorName }}</h3>
           <span class="post-time">{{ post.createdAt }}</span>
@@ -121,6 +126,13 @@ const loadMoreComments = async (post) => {
     console.log('log.loadMoreComments.error', error)
     message.error('加载更多评论失败')
   }
+}
+
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
+const goToUserProfile = (userId) => {
+  router.push(`/wb/u/${userId}`)
 }
 </script>
 

@@ -13,7 +13,7 @@
       </div>
     </div>
     <div v-else class="profile-card">
-      <div class="avatar" @click="goToUserProfile">
+      <div class="avatar" @click="goToUserProfile()">
         <img :src="user.avatar" alt="头像" class="profile-avatar" />
       </div>
       <div class="profile-header">
