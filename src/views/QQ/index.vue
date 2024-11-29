@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, nextTick } from 'vue'
 import { message } from 'ant-design-vue'
 import { useConversationStore } from '@/store/modules/conversation'
-import { useMessageStore } from '@/store/modules/message'
+import { useMessageStore } from '@/store/modules/Message'
 import { useUserStore } from '@/store/modules/user'
 import AddFriendModal from './components/AddFriendModal.vue'
 import CreateGroupModal from './components/CreateGroupModal.vue'
@@ -13,7 +13,16 @@ import MediaUploadModal from './components/MediaUploadModal.vue'
 import { CbEvents } from '@openim/wasm-client-sdk'
 import { IMSDK } from '@/utils/imCommon'
 import NavView from '@/components/navView.vue'
-
+import { LoadingOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
+const indicator = h(LoadingOutlined, {
+  style: {
+    fontSize: '24px',
+    display: 'absolute',
+    left: '300px',
+  },
+  spin: true,
+})
 const conversationStore = useConversationStore()
 const messageStore = useMessageStore()
 const userStore = useUserStore()
@@ -28,20 +37,16 @@ const chats = ref([])
 const showAddMenu = ref(false)
 const showAddFriendModal = ref(false)
 const showCreateGroupModal = ref(false)
-
+const isScrollLoad = ref(false)
+const isFirst = ref(true)
 const messages = ref([])
 const messageListRef = ref(null)
 
 onMounted(() => {
   getConversationList()
-  console.log('log.onMounted.1')
   IMSDK.on(CbEvents.OnRecvNewMessages, ({ data }) => {
-    console.log('log.OnRecvNewMessages.data', data)
-    console.log('log.OnRecvNewMessages', 'data[0]', data[0])
-    console.log('log.OnRecvNewMessages', 'selectedChat.value.userID', selectedChat.value.userID)
     const msg = data[0]
     if (msg.sendID === selectedChat.value.userID) {
-      console.log('log.onMounted.3')
       messages.value.push({
         id: messages.value.length + 1,
         sender: 'other',
@@ -55,17 +60,16 @@ onMounted(() => {
     }
     // 使用 nextTick 确保 DOM 更新后滚动到底部
     nextTick(() => {
-      if (messageListRef.value) {
+      if (messageListRef.value && isFirst.value) {
         messageListRef.value.scrollTop = messageListRef.value.scrollHeight
       }
     })
   })
-  console.log('log.onMounted.2')
 })
 
 // 修改 getConversationList 方法
 const getConversationList = async () => {
-  await conversationStore.getConversationList()
+  await conversationStore.getConversationList(isScrollLoad.value)
   chats.value = [friendNotification, ...conversationStore.conversationList]
   chats.value.forEach((item) => {
     if (!item.isFriendNotification) {
@@ -78,16 +82,30 @@ const getConversationList = async () => {
 
 // 修改 selectChat 方法
 const selectChat = async (chat) => {
-  selectedChat.value = chat
-
-  if (chat.isFriendNotification) {
+  if (!chat) {
+    isFirst.value = false
+  } else {
+    isFirst.value = true
+    messages.value = []
+  }
+  selectedChat.value = chat ? chat : selectedChat.value
+  if (chat?.isFriendNotification) {
     // 如果是好友通知会话，不需要获取消息历史
     messages.value = []
     return
   }
 
   // 原有的消息获取逻辑
-  const data = await messageStore.getAdvancedHistoryMessageList(chat.conversationID)
+  const { data, isEnd } = await messageStore.getAdvancedHistoryMessageList(
+    selectedChat.value.conversationID,
+    isFirst.value,
+  )
+  if (isEnd) {
+    isScrollLoad.value = false
+    message.warning('已经到顶了')
+  }
+  const data_len = data.length
+  const messages_len = messages.value.length
   messages.value = data.map((item) => {
     return {
       id: item.clientMsgID || '',
@@ -99,8 +117,11 @@ const selectChat = async (chat) => {
   })
 
   nextTick(() => {
-    if (messageListRef.value) {
+    if (messageListRef.value && isFirst.value) {
       messageListRef.value.scrollTop = messageListRef.value.scrollHeight
+    } else {
+      const height = messageListRef.value.scrollHeight
+      messageListRef.value.scrollTop = ((data_len - messages_len) / data_len) * height
     }
   })
 }
@@ -127,9 +148,6 @@ const sendMessage = async () => {
       avatar: '/placeholder.svg?height=40&width=40',
     })
     const msgItem = await messageStore.createTextMessage(messageInput.value)
-    console.log('log.sendMessage.msgItem', msgItem)
-
-    console.log('log.sendMessage.selectedChat.value', selectedChat.value)
     messageStore.sendMessage(selectedChat.value.userID, msgItem)
     messageInput.value = ''
 
@@ -211,6 +229,18 @@ const handleFriendRequest = (requestId, action) => {
     } else if (action === 'reject') {
       request.status = '已拒绝'
       message.success('已拒绝好友请求')
+    }
+  }
+}
+const onScroll = async (e) => {
+  if (e.target.scrollTop === 0) {
+    isScrollLoad.value = true
+    try {
+      // if(is)
+      await selectChat()
+      isScrollLoad.value = false
+    } catch {
+      message.warning('error')
     }
   }
 }
@@ -337,7 +367,8 @@ const handleFriendRequest = (requestId, action) => {
                 <MoreOutlined class="action-icon" @click="toggleMoreOptions" />
               </div>
             </div>
-            <div class="message-list" ref="messageListRef">
+            <div class="message-list" ref="messageListRef" @scroll="onScroll">
+              <a-spin v-if="isScrollLoad" :indicator="indicator" />
               <div v-for="msg in messages" :key="msg.id" :class="['message', msg.sender]">
                 <a-avatar v-if="msg.sender === 'other'" :src="msg.avatar" class="message-avatar" />
                 <div class="message-bubble">

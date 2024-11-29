@@ -66,12 +66,12 @@ export const useConversationStore = defineStore(
       try {
         await userStore.tryLogin()
         const { data } = await IMSDK.getConversationListSplit({
-          offset: isScrollLoad ? this.conversationList.length : 0,
+          offset: isScrollLoad ? conversationList.value.length : 0,
           count: 20,
         })
         console.log('log.getConversationListSplit', data)
         const cves = data
-        conversationList.value = [...(isScrollLoad ? this.conversationList : []), ...cves]
+        conversationList.value = [...(isScrollLoad ? conversationList.value.length : []), ...cves]
         console.log(conversationList.value, '好友列表')
         return cves.length === 20
       } catch (error) {

@@ -4,17 +4,35 @@ import { IMSDK } from '@/utils/imCommon'
 
 export const useMessageStore = defineStore('message', () => {
   const messageList = ref([])
-  const getAdvancedHistoryMessageList = async (conversationID) => {
+  const lastMinSeq = ref(0)
+  const startClientMsgID = ref(null)
+  const isEnd = ref(false)
+  const getAdvancedHistoryMessageList = async (conversationID, isFirst) => {
     try {
+      if (isFirst) {
+        lastMinSeq.value = 0
+        startClientMsgID.value = null
+        isEnd.value = false
+        messageList.value = []
+      }
       const { data } = await IMSDK.getAdvancedHistoryMessageList({
-        lastMinSeq: 0,
+        lastMinSeq: lastMinSeq.value,
         count: 20,
-        startClientMsgID: '',
+        startClientMsgID: startClientMsgID.value ? startClientMsgID.value : '',
         conversationID: conversationID,
       })
-      console.log('log.success.getAdvancedHistoryMessageList', data)
-      messageList.value = data.messageList
-      return data.messageList
+      // messageList.value = data.messageList
+      lastMinSeq.value = data.lastMinSeq
+      startClientMsgID.value = data.messageList[0].clientMsgID
+      isEnd.value = data.isEnd
+      console.log('log.success.getAdvancedHistoryMessageList', messageList.value, data)
+
+      if (messageList.value && messageList.value.length > 0) {
+        messageList.value = [...data.messageList, ...messageList.value]
+      } else {
+        messageList.value = data.messageList
+      }
+      return { data: messageList.value, isEnd: isEnd.value }
     } catch (error) {
       const { errCode, errMsg } = error
       console.log('log.fail.getAdvancedHistoryMessageList', errCode, errMsg)
@@ -23,7 +41,7 @@ export const useMessageStore = defineStore('message', () => {
   }
   const getAdvancedHistoryMessageListReverse = async (conversationID) => {
     IMSDK.getAdvancedHistoryMessageListReverse({
-      lastMinSeq: 0,
+      lastMinSeq: lastMinSeq.value,
       count: 20,
       startClientMsgID: '',
       conversationID: conversationID,
