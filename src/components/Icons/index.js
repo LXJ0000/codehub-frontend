@@ -36,6 +36,9 @@ import {
   PhoneOutlined,
   DesktopOutlined,
   PlusOutlined,
+  HeartOutlined,
+  HeartFilled,
+  CommentOutlined,
 } from '@ant-design/icons-vue'
 
 // 以上图标都需要全局注册
@@ -76,6 +79,9 @@ const icons = [
   PhoneOutlined,
   DesktopOutlined,
   PlusOutlined,
+  HeartOutlined,
+  HeartFilled,
+  CommentOutlined,
 ]
 
 // app.use({ install(){ } })

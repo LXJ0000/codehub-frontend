@@ -13,7 +13,7 @@
       </div>
     </div>
     <div v-else class="profile-card">
-      <div class="avatar">
+      <div class="avatar" @click="goToUserProfile()">
         <img :src="user.avatar" alt="头像" class="profile-avatar" />
       </div>
       <div class="profile-header">
@@ -36,7 +36,9 @@
           <span class="stat-value">{{ user.postCount }}</span>
         </div>
       </div>
-      <a-button type="primary" block @click="showModal">退出登录</a-button>
+      <a-button type="primary" block @click="showModal" style="border-radius: 16px"
+        >退出登录</a-button
+      >
       <a-modal
         v-model:open="open"
         centered
@@ -51,9 +53,9 @@
     <div class="hot-topics">
       <div class="topics-header">
         <h3>悦联热搜</h3>
-        <a-button type="link" class="refresh-btn">
+        <a-button type="link" class="refresh-btn" style="border-radius: 16px">
           <RefreshCw class="refresh-icon" />
-          点击刷新
+          刷新
         </a-button>
       </div>
 
@@ -124,7 +126,9 @@ const getUserInfo = async () => {
         : response.data.profile.user_name
       user.value.avatar = response.data.profile.avatar
       user.value.birthday = response.data.profile.birthday
-      user.value.about_me = response.data.profile.about_me ? response.data.profile.about_me : '这个人很懒，什么都没留下'
+      user.value.about_me = response.data.profile.about_me
+        ? response.data.profile.about_me
+        : '这个人很懒，什么都没留下'
       user.value.email = response.data.profile.email
       user.value.id = response.data.profile.relation_stat.user_id
     }
@@ -132,6 +136,11 @@ const getUserInfo = async () => {
     console.error('Error fetching user info:', error)
   }
 }
+
+const goToUserProfile = () => {
+  router.push(`wb/u/${userStore.user.user_id}`)
+}
+
 onMounted(() => {
   getUserInfo()
 })

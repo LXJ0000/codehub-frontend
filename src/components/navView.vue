@@ -7,7 +7,7 @@
           class="logo"
           src="https://tvax1.sinaimg.cn/crop.0.0.1079.1079.180/006UebRdly8hket8gaah4j30tz0tzmz2.jpg?KID=imgbed,tva&Expires=1731430147&ssig=4qtJVzbHnZ"
         />
-        <a-input-search v-model:value="searchText" placeholder="搜索悦联" class="search-input" />
+        <a-input-search v-model:value="searchText" placeholder="搜索" class="search-input" />
       </div>
 
       <div class="center-section">
@@ -25,8 +25,8 @@
       </div>
 
       <div class="right-section">
-        <a-button type="primary" class="login-btn">登录</a-button>
-        <a-button>注册</a-button>
+        <a-button type="primary" class="login-btn" style="border-radius: 16px">登录</a-button>
+        <a-button style="border-radius: 16px">注册</a-button>
         <!-- <a-button class="icon-btn">
           <Moon class="icon" />
         </a-button>
@@ -49,11 +49,11 @@ const route = useRoute()
 const currentPath = computed(() => route.path)
 
 const navItems = [
-  { path: '/wb', icon: 'Home', name: '首页' },
-  { path: '/qq', icon: 'Flame', name: '聊天' },
+  { path: '/wb', name: '首页' },
+  { path: '/qq', name: '聊天' },
   // { path: '/video', icon: Video, name: '私信' },
-  { path: '/ai', icon: 'Mail', name: 'AI' },
-  { path: '/profile', icon: 'User', name: '设置' },
+  { path: '/chat', name: 'AI' },
+  { path: '/profile', name: '设置' },
 ]
 </script>
 
@@ -90,7 +90,7 @@ const navItems = [
 }
 
 .search-input {
-  width: 300px;
+  width: 150px;
   border-radius: 4px;
   background: #f5f7fa;
 }

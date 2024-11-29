@@ -2,7 +2,7 @@
   <div class="dashboard-container">
     <a-card title="用户仪表板" class="dashboard-card">
       <template #extra>
-        <a-button @click="handleLogout">退出登录</a-button>
+        <a-button @click="handleLogout" style="border-radius: 16px">退出登录</a-button>
       </template>
       <p><strong>用户名:</strong> {{ userStore.user?.user_name }}</p>
       <p><strong>邮箱:</strong> {{ userStore.user?.email }}</p>

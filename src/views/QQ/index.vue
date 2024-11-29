@@ -23,6 +23,8 @@ const indicator = h(LoadingOutlined, {
   },
   spin: true,
 })
+import * as api from '@/services/api'
+
 const conversationStore = useConversationStore()
 const messageStore = useMessageStore()
 const userStore = useUserStore()
@@ -52,7 +54,7 @@ onMounted(() => {
         sender: 'other',
         content: msg.textElem?.content || '',
         time: msg.sendTime || '',
-        avatar: '/placeholder.svg?height=40&width=40',
+        avatar: selectedChat.value.faceURL,
       })
     } else {
       const chat = chats.value.find((item) => item.userID === msg.sendID)
@@ -67,20 +69,43 @@ onMounted(() => {
   })
 })
 
-// 修改 getConversationList 方法
 const getConversationList = async () => {
   await conversationStore.getConversationList(isScrollLoad.value)
   chats.value = [friendNotification, ...conversationStore.conversationList]
   chats.value.forEach((item) => {
-    if (!item.isFriendNotification) {
-      item.lastMessage = JSON.parse(item.latestMsg).textElem.content
-      item.time = new Date(item.latestMsgSendTime).toLocaleDateString()
-      item.unread = item.unreadCount
+    try {
+      if (!item.isFriendNotification) {
+        const latestMsg = JSON.parse(item.latestMsg)
+        item.lastMessage = latestMsg?.textElem?.content || ''
+        item.time = new Date(item.latestMsgSendTime).toLocaleDateString()
+        item.unread = item.unreadCount
+        item.myFaceURL = userStore.user.avatar
+      }
+    } catch (e) {
+      console.log('log.getConversationList.error', e)
+      item.lastMessage = '解析消息错误'
     }
   })
+  // 从基础后端获取用户信息 并打印
+  try {
+    const userIds = chats.value.map((item) => item.userID).filter((userID) => userID)
+    if (userIds.length > 0) {
+      const resp = await api.batchGetUserInfo(userIds)
+      // 获取用户信息之后，使用 users 更新会话列表中的用户信息
+      const users = resp.data.profiles
+      chats.value.forEach((item) => {
+        const user = users.find((user) => user.user_id === item.userID)
+        if (user) {
+          item.showName = user.nick_name || user.user_name
+          item.faceURL = user.avatar
+        }
+      })
+    }
+  } catch (e) {
+    console.log('log.getConversationList.error', e)
+  }
 }
 
-// 修改 selectChat 方法
 const selectChat = async (chat) => {
   if (!chat) {
     isFirst.value = false
@@ -112,7 +137,7 @@ const selectChat = async (chat) => {
       sender: item.sendID === userStore.userID ? 'user' : 'other',
       content: item.textElem?.content || '',
       time: item.sendTime || '',
-      avatar: '/placeholder.svg?height=40&width=40',
+      avatar: item.sendID === userStore.userID ? chat.myFaceURL : chat.faceURL,
     }
   })
 
@@ -145,7 +170,7 @@ const sendMessage = async () => {
       sender: 'user',
       content: messageInput.value,
       time: new Date().toLocaleString(),
-      avatar: '/placeholder.svg?height=40&width=40',
+      avatar: userStore.user.avatar,
     })
     const msgItem = await messageStore.createTextMessage(messageInput.value)
     messageStore.sendMessage(selectedChat.value.userID, msgItem)

@@ -56,15 +56,14 @@ const loading = ref(false)
 const fetchPosts = async (page = 1) => {
   loading.value = true
   try {
-    const response = await api.fetchPosts(page)
-    // const response = await request('/post/reader', 'GET', { page, size: 10 })
+    const response = await api.fetchPosts(0, page)
     if (response.code === 0) {
       posts.value = response.data.post_list.map((item) => ({
         id: item.post.post_id,
         title: item.post.title,
         content: item.post.content,
         abstract: item.post.abstract,
-        authorId: item.post.author_id,
+        authorId: item.post.author.user_id,
         createdAt: new Date(item.post.created_at * 1000).toLocaleString(),
         status: item.post.status,
         liked: item.stat.liked,
@@ -78,6 +77,7 @@ const fetchPosts = async (page = 1) => {
         authorName: item.post.author.nick_name
           ? item.post.author.nick_name
           : item.post.author.user_name,
+        comment_count: item.comment_count,
       }))
       // 更新分页信息
       pagination.total = response.data.count
