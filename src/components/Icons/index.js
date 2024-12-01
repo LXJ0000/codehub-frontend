@@ -39,6 +39,9 @@ import {
   HeartOutlined,
   HeartFilled,
   CommentOutlined,
+  UserAddOutlined,
+  FilterOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons-vue'
 
 // 以上图标都需要全局注册
@@ -82,6 +85,9 @@ const icons = [
   HeartOutlined,
   HeartFilled,
   CommentOutlined,
+  UserAddOutlined,
+  FilterOutlined,
+  DeleteOutlined,
 ]
 
 // app.use({ install(){ } })

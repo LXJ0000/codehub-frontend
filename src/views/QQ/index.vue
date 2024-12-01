@@ -46,6 +46,11 @@ const messageListRef = ref(null)
 
 onMounted(() => {
   getConversationList()
+  // getFriendApplicationListAsApplicant()
+  // getFriendApplicationListAsRecipient()
+  IMSDK.on(CbEvents.OnFriendApplicationAdded, ({ data }) => {
+    console.log('log.success.OnFriendApplicationAdded', data)
+  })
   IMSDK.on(CbEvents.OnRecvNewMessages, ({ data }) => {
     const msg = data[0]
     if (msg.sendID === selectedChat.value.userID) {
@@ -117,6 +122,7 @@ const selectChat = async (chat) => {
   if (chat?.isFriendNotification) {
     // 如果是好友通知会话，不需要获取消息历史
     messages.value = []
+    getFriendApplicationList()
     return
   }
 
@@ -212,26 +218,127 @@ const filteredChats = computed(() => {
 
 // 新增好友请求相关数据
 const friendRequests = ref([
-  {
-    id: 1,
-    userID: 'user1',
-    nickname: '向阳、',
-    avatar: '/placeholder.svg?height=40&width=40',
-    addTime: '2024/06/25',
-    message: '请求添加对方为好友',
-    status: '等待验证',
-  },
-  {
-    id: 2,
-    userID: 'user2',
-    nickname: '好运连连',
-    avatar: '/placeholder.svg?height=40&width=40',
-    addTime: '2024/05/30',
-    message: '请求添加为好友',
-    status: '已同意',
-  },
-  // ... 更多好友请求数据
+  // {
+  //   id: 1,
+  //   userID: 'user1',
+  //   nickname: '向阳、',
+  //   avatar: '/placeholder.svg?height=40&width=40',
+  //   addTime: '2024/06/25',
+  //   message: '请求添加对方为好友',
+  //   status: '等待验证',
+  // },
+  // {
+  //   id: 2,
+  //   userID: 'user2',
+  //   nickname: '好运连连',
+  //   avatar: '/placeholder.svg?height=40&width=40',
+  //   addTime: '2024/05/30',
+  //   message: '请求添加为好友',
+  //   status: '已同意',
+  // },
+  // // ... 更多好友请求数据
 ])
+
+const getFriendApplicationList = async () => {
+  // 处理结果枚举
+  // export declare enum ApplicationHandleResult {
+  //     Unprocessed = 0,
+  //     Agree = 1,
+  //     Reject = -1
+  // }
+  // 接受的好友请求
+  const recv = ref([])
+  const send = ref([])
+  await IMSDK.getFriendApplicationListAsRecipient()
+    .then(({ data }) => {
+      console.log('log.success.getFriendApplicationListAsRecipient', data)
+      recv.value = data
+      // // 组装 friendRequests TODO 持久化
+      // data.map((item) => {
+      //   friendRequests.value.push({
+      //     id: item.id,
+      //     userID: item.fromUserID,
+      //     nickname: item.fromNickname,
+      //     // avatar: item.fromUserFaceURL,
+      //     addTime: new Date(item.createTime).toLocaleDateString(),
+      //     message: item.reqMsg,
+      //     status: '等待验证',
+      //   })
+      // })
+    })
+    .catch(({ errCode, errMsg }) => {
+      console.log('log.error.getFriendApplicationListAsRecipient', errCode, errMsg)
+    })
+  // 发送的好友请求
+  await IMSDK.getFriendApplicationListAsApplicant()
+    .then(({ data }) => {
+      console.log('log.success.getFriendApplicationListAsApplicant', data)
+      send.value = data
+    })
+    .catch(({ errCode, errMsg }) => {
+      console.log('log.error.getFriendApplicationListAsApplicant', errCode, errMsg)
+    })
+  friendRequests.value = []
+  recv.value.forEach((item) => {
+    let status = '等待验证'
+    if (item.handleResult === 1) {
+      status = '已同意'
+    } else if (item.handleResult === -1) {
+      status = '已拒绝'
+    }
+
+    friendRequests.value.push({
+      userID: item.fromUserID,
+      nickname: item.fromNickname,
+      addTime: new Date(item.createTime).toLocaleDateString(),
+      message: item.reqMsg,
+      status: status,
+    })
+  })
+
+  send.value.forEach((item) => {
+    let status = '已发送'
+    if (item.handleResult === 1) {
+      status = '对方同意好友申请'
+    } else if (item.handleResult === -1) {
+      status = '对方拒绝好友申请'
+    }
+    friendRequests.value.push({
+      userID: item.toUserID,
+      nickname: item.toNickname,
+      avatar: item.toFaceURL,
+      addTime: new Date(item.createTime).toLocaleDateString(),
+      message: item.reqMsg,
+      status: status,
+    })
+  })
+}
+
+const acceptFriendApplication = async (toUserID, handleMsg) => {
+  IMSDK.acceptFriendApplication({
+    toUserID: toUserID,
+    handleMsg: handleMsg,
+  })
+    .then(() => {
+      console.log('log.success.acceptFriendApplication')
+    })
+    .catch(({ errCode, errMsg }) => {
+      console.log('log.error.acceptFriendApplication', errCode, errMsg)
+    })
+}
+
+const refuseFriendApplication = async (toUserID, handleMsg) => {
+  IMSDK.refuseFriendApplication({
+    toUserID: toUserID,
+    handleMsg: handleMsg,
+  })
+    .then(() => {
+      console.log('log.success.refuseFriendApplication')
+    })
+    .catch(({ errCode, errMsg }) => {
+      console.log('log.error.refuseFriendApplication', errCode, errMsg)
+    })
+}
 
 // 新增好友通知会话
 const friendNotification = {
@@ -249,11 +356,13 @@ const handleFriendRequest = (requestId, action) => {
   const request = friendRequests.value.find((req) => req.id === requestId)
   if (request) {
     if (action === 'accept') {
-      request.status = '已同意'
-      message.success('已同意好友请求')
+      acceptFriendApplication(request.userID, '同意添加好友')
+      // request.status = '已同意'
+      // message.success('已同意好友请求')
     } else if (action === 'reject') {
-      request.status = '已拒绝'
-      message.success('已拒绝好友请求')
+      refuseFriendApplication(request.userID, '拒绝添加好友')
+      // request.status = '已拒绝'
+      // message.success('已拒绝好友请求')
     }
   }
 }

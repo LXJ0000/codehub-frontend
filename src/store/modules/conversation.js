@@ -71,10 +71,10 @@ export const useConversationStore = defineStore(
         })
         const cves = data
         conversationList.value = [...(isScrollLoad ? conversationList.value.length : []), ...cves]
-        console.log(conversationList.value, '好友列表')
+        console.log('log.success.getConversationList', data)
         return cves.length === 20
       } catch (error) {
-        console.error(error)
+        console.log('log.error.getConversationList', error)
         return false
       }
     }
