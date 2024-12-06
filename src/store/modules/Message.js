@@ -26,6 +26,20 @@ export const useMessageStore = defineStore('message', () => {
       startClientMsgID.value = data.messageList[0].clientMsgID
       isEnd.value = data.isEnd
       console.log('log.success.getAdvancedHistoryMessageList', messageList.value, data)
+      data.messageList = data.messageList.filter((item) => {
+        if (item.contentType === 1201) {
+          // 解析 JSON 字符串
+          const detail = JSON.parse(item.notificationElem.detail)
+          // 确保 item.textElem 已经被初始化为一个对象
+          if (!item.textElem) {
+            item.textElem = {}
+          }
+          // 取出 handleMsg 并赋值给 item.textElem.content
+          item.textElem.content = detail.handleMsg
+        }
+        // 如果消息内容为空，则不显示
+        return item.textElem && item.textElem.content
+      })
 
       if (messageList.value && messageList.value.length > 0) {
         messageList.value = [...data.messageList, ...messageList.value]

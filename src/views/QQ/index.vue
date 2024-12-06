@@ -485,7 +485,7 @@ const onScroll = async (e) => {
               <div v-for="msg in messages" :key="msg.id" :class="['message', msg.sender]">
                 <a-avatar v-if="msg.sender === 'other'" :src="msg.avatar" class="message-avatar" />
                 <div class="message-bubble">
-                  <div class="message-content">{{ msg.content }}</div>
+                  <div :class="['message-content', msg.sender]">{{ msg.content }}</div>
                   <div class="message-time">{{ new Date(msg.time).toLocaleString() }}</div>
                 </div>
                 <a-avatar v-if="msg.sender === 'user'" :src="msg.avatar" class="message-avatar" />
@@ -672,11 +672,23 @@ const onScroll = async (e) => {
   flex-direction: column;
 }
 
-.message-content {
+.message-content.user {
   background-color: #f0f0f0;
   padding: 8px 12px;
   border-radius: 8px;
   display: inline-block;
+  word-break: break-word;
+  width: fit-content;
+  align-self: flex-end;
+}
+
+.message-content.other {
+  background-color: #f0f0f0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: inline-block;
+  word-break: break-word;
+  width: fit-content;
 }
 
 .message.user .message-content {
