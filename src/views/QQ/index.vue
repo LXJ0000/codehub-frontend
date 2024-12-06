@@ -44,6 +44,7 @@ const showAddMenu = ref(false)
 const showAddFriendModal = ref(false)
 const showCreateGroupModal = ref(false)
 const isScrollLoad = ref(false)
+const isEnd = ref(false) // 判断是否已经加载到最后一条消息
 const isFirst = ref(true)
 const messages = ref([])
 const messageListRef = ref(null)
@@ -160,12 +161,13 @@ const selectChat = async (chat) => {
   }
 
   // 原有的消息获取逻辑
-  const { data, isEnd } = await messageStore.getAdvancedHistoryMessageList(
+  const { data, isend } = await messageStore.getAdvancedHistoryMessageList(
     selectedChat.value.conversationID,
     isFirst.value,
   )
-  if (isEnd) {
+  if (isend) {
     isScrollLoad.value = false
+    isEnd.value = true
   }
   const data_len = data.length
   const messages_len = messages.value.length
@@ -175,7 +177,10 @@ const selectChat = async (chat) => {
       sender: item.sendID === userStore.userID ? 'user' : 'other',
       content: item.textElem?.content || '',
       time: item.sendTime || '',
-      avatar: item.sendID === userStore.userID ? chat.myFaceURL : chat.faceURL,
+      avatar:
+        item.sendID === userStore.userID
+          ? selectedChat.value.myFaceURL
+          : selectedChat.value.faceURL,
     }
   })
 
@@ -345,16 +350,29 @@ const handleFriendRequest = (requestId, action) => {
     getFriendApplicationList()
   }
 }
+
 const onScroll = async (e) => {
-  if (e.target.scrollTop === 0) {
+  if (!e) {
+    console.error('log.Scroll event is null or undefined')
+    return
+  }
+
+  console.log('log.Scroll event:', e)
+  console.log('log.Scroll top:', e.target.scrollTop)
+
+  if (e.target.scrollTop === 0 && !isScrollLoad.value && !isEnd.value) {
     isScrollLoad.value = true
     try {
-      // if(is)
       await selectChat()
+    } catch (error) {
+      console.error('log.Error occurred while selecting chat:', error)
+    } finally {
       isScrollLoad.value = false
-    } catch {
-      message.warning('error')
     }
+  }
+
+  if (isEnd.value) {
+    isScrollLoad.value = false
   }
 }
 </script>
