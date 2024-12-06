@@ -15,6 +15,9 @@ import { IMSDK } from '@/utils/imCommon'
 import NavView from '@/components/navView.vue'
 import { LoadingOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
+import { useFriendReqStore } from '@/store/modules/friendReq'
+import * as api from '@/services/api'
+
 const indicator = h(LoadingOutlined, {
   style: {
     fontSize: '24px',
@@ -23,8 +26,7 @@ const indicator = h(LoadingOutlined, {
   },
   spin: true,
 })
-import * as api from '@/services/api'
-
+const friendReqStore = useFriendReqStore()
 const conversationStore = useConversationStore()
 const messageStore = useMessageStore()
 const userStore = useUserStore()
@@ -45,55 +47,34 @@ const messages = ref([])
 const messageListRef = ref(null)
 
 onMounted(() => {
+  // updateFriendNotification()
   getConversationList()
+  // getFriendApplicationList()
   IMSDK.on(CbEvents.OnFriendApplicationAccepted, ({ data }) => {
     // data 好友申请
     console.log('log.success.OnFriendApplicationAccepted', data)
-    getConversationList()
+    // getConversationList()
+    // getFriendApplicationList()
+    setTimeout(() => {
+      // friendReqStore.getFriendApplicationList()
+      getFriendApplicationList()
+    }, 500)
   })
   IMSDK.on(CbEvents.OnFriendApplicationAdded, ({ data }) => {
     console.log('log.success.OnFriendApplicationAdded', data)
-    // 检查 data.fromUserID 是否在 friendRequests 中
-    const existingRequestIndex = friendRequests.value.findIndex(
-      (request) => request.userID === data.fromUserID,
-    )
 
-    // 确定请求的状态
-    let status = '等待验证'
-    if (data.handleResult === 1) {
-      status = '已同意'
-    } else if (data.handleResult === -1) {
-      status = '已拒绝'
-    }
+    setTimeout(() => {
+      // friendReqStore.getFriendApplicationList()
+      getFriendApplicationList()
+    }, 500)
+    // friendNotification.time = new Date().toLocaleDateString()
+    // friendNotification.lastMessage = `${friendReqStore.unResolve}个未处理请求`
 
-    const newRequest = {
-      userID: data.toUserID,
-      nickname: data.toNickname,
-      avatar: data.toFaceURL,
-      addTime: new Date(data.createTime).toLocaleDateString(),
-      message: data.reqMsg,
-      status: status,
-    }
-
-    if (existingRequestIndex !== -1) {
-      // 更新现有的请求
-      friendRequests.value[existingRequestIndex] = newRequest
-    } else {
-      // 添加新的请求
-      // 考虑这里直接 getFriendApplicationList
-      // 但是 existingRequestIndex !== -1 的情况会被覆盖
-      // TODO 后续考虑持久化存储好友请求列表 动态维护好友请求列表
-      friendNotification.time = new Date().toLocaleDateString()
-      friendNotification.unread++
-      friendNotification.lastMessage = `${friendNotification.unread}个新好友请求`
-    }
-
-    // 如果当前选中的聊天是好友通知，重新获取好友申请列表 这里可能会覆盖前面 friendRequests.value[existingRequestIndex] = newRequest
-    if (selectedChat.value.id === 'friend-notification') {
-      setTimeout(() => {
-        getConversationList()
-      }, 500)
-    }
+    // if (selectedChat.value.id === 'friend-notification') {
+    //   setTimeout(() => {
+    //     getConversationList()
+    //   }, 500)
+    // }
   })
   IMSDK.on(CbEvents.OnRecvNewMessages, ({ data }) => {
     const msg = data[0]
@@ -120,6 +101,12 @@ onMounted(() => {
 
 const getConversationList = async () => {
   await conversationStore.getConversationList(isScrollLoad.value)
+
+  await friendReqStore.getFriendApplicationList()
+  const cnt = friendReqStore.unResolve
+  friendNotification.lastMessage = cnt > 0 ? `${cnt}个未处理请求` : ''
+  friendNotification.time = friendReqStore.firendReq[0].addTime
+
   chats.value = [friendNotification, ...conversationStore.conversationList]
   chats.value.forEach((item) => {
     try {
@@ -177,7 +164,6 @@ const selectChat = async (chat) => {
   )
   if (isEnd) {
     isScrollLoad.value = false
-    message.warning('已经到顶了')
   }
   const data_len = data.length
   const messages_len = messages.value.length
@@ -263,70 +249,18 @@ const filteredChats = computed(() => {
 // 新增好友请求相关数据
 const friendRequests = ref([])
 
+// 点击好友通知会话
 const getFriendApplicationList = async () => {
-  friendNotification.unread = 0
-  friendNotification.lastMessage = ''
-  friendNotification.time = new Date().toLocaleDateString()
-  // 处理结果枚举
-  // export declare enum ApplicationHandleResult {
-  //     Unprocessed = 0,
-  //     Agree = 1,
-  //     Reject = -1
-  // }
-  // 接受的好友请求
-  const recv = ref([])
-  const send = ref([])
-  await IMSDK.getFriendApplicationListAsRecipient()
-    .then(({ data }) => {
-      console.log('log.success.getFriendApplicationListAsRecipient', data)
-      recv.value = data
-    })
-    .catch(({ errCode, errMsg }) => {
-      console.log('log.error.getFriendApplicationListAsRecipient', errCode, errMsg)
-    })
-  // 发送的好友请求
-  await IMSDK.getFriendApplicationListAsApplicant()
-    .then(({ data }) => {
-      console.log('log.success.getFriendApplicationListAsApplicant', data)
-      send.value = data
-    })
-    .catch(({ errCode, errMsg }) => {
-      console.log('log.error.getFriendApplicationListAsApplicant', errCode, errMsg)
-    })
-  friendRequests.value = []
-  recv.value.forEach((item) => {
-    let status = '等待验证'
-    if (item.handleResult === 1) {
-      status = '已同意'
-    } else if (item.handleResult === -1) {
-      status = '已拒绝'
-    }
+  friendRequests.value = await friendReqStore.getFriendApplicationList()
+  updateFriendNotification()
+}
 
-    friendRequests.value.push({
-      userID: item.fromUserID,
-      nickname: item.fromNickname,
-      addTime: new Date(item.createTime).toLocaleDateString(),
-      message: item.reqMsg,
-      status: status,
-    })
-  })
-
-  send.value.forEach((item) => {
-    let status = '已发送'
-    if (item.handleResult === 1) {
-      status = '对方同意好友申请'
-    } else if (item.handleResult === -1) {
-      status = '对方拒绝好友申请'
-    }
-    friendRequests.value.push({
-      userID: item.toUserID,
-      nickname: item.toNickname,
-      avatar: item.toFaceURL,
-      addTime: new Date(item.createTime).toLocaleDateString(),
-      message: item.reqMsg,
-      status: status,
-    })
-  })
+// 更新好友通知会话
+const updateFriendNotification = async () => {
+  const cnt = friendReqStore.unResolve
+  friendNotification.lastMessage = cnt > 0 ? `${cnt}个未处理请求` : ''
+  friendNotification.time = friendReqStore.firendReq[0].addTime
+  getConversationList()
 }
 
 const acceptFriendApplication = (toUserID, handleMsg) => {
@@ -336,6 +270,7 @@ const acceptFriendApplication = (toUserID, handleMsg) => {
   })
     .then(() => {
       console.log('log.success.acceptFriendApplication')
+      getFriendApplicationList()
     })
     .catch(({ errCode, errMsg }) => {
       console.log('log.error.acceptFriendApplication', errCode, errMsg)
@@ -349,6 +284,7 @@ const refuseFriendApplication = (toUserID, handleMsg) => {
   })
     .then(() => {
       console.log('log.success.refuseFriendApplication')
+      getFriendApplicationList()
     })
     .catch(({ errCode, errMsg }) => {
       console.log('log.error.refuseFriendApplication', errCode, errMsg)
@@ -362,7 +298,6 @@ const friendNotification = {
   faceURL: 'http://106.52.176.243:9000/go-backend/98104ba394b575034afd5e5354baaf1.jpg',
   lastMessage: ``,
   time: new Date().toLocaleDateString(),
-  unread: friendRequests.value.length,
   isFriendNotification: true, // 用于标识这是好友通知会话
 }
 
@@ -374,16 +309,17 @@ const handleFriendRequest = (requestId, action) => {
       acceptFriendApplication(request.userID, '同意添加好友')
       request.status = '已同意'
       message.success('已同意好友请求')
-      getConversationList()
-      // 睡眠一段时间，等待好友会话列表更新
-      setTimeout(() => {
-        getConversationList()
-      }, 1000)
+      // getConversationList()
+      // // 睡眠一段时间，等待好友会话列表更新
+      // setTimeout(() => {
+      //   getConversationList()
+      // }, 1000)
     } else if (action === 'reject') {
       refuseFriendApplication(request.userID, '拒绝添加好友')
       request.status = '已拒绝'
       message.success('已拒绝好友请求')
     }
+    getFriendApplicationList()
   }
 }
 const onScroll = async (e) => {
@@ -623,9 +559,11 @@ const onScroll = async (e) => {
 
 .chat-name {
   font-weight: bold;
+  font-size: 14px;
 }
 
 .last-message {
+  padding-top: 4px;
   font-size: 12px;
   color: #8c8c8c;
 }
@@ -828,6 +766,7 @@ const onScroll = async (e) => {
 .request-status {
   display: flex;
   gap: 8px;
+  font-size: 13px;
 }
 
 .request-status.已同意 {
