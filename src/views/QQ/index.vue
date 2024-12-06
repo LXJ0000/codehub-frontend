@@ -17,6 +17,8 @@ import { LoadingOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 import { useFriendReqStore } from '@/store/modules/friendReq'
 import * as api from '@/services/api'
+import friendReq from '@/assets/friend_req.png'
+import defaultAvatar from '@/assets/default_avatar.png'
 
 const indicator = h(LoadingOutlined, {
   style: {
@@ -133,7 +135,7 @@ const getConversationList = async () => {
         const user = users.find((user) => user.user_id === item.userID)
         if (user) {
           item.showName = user.nick_name || user.user_name
-          item.faceURL = user.avatar
+          item.faceURL = user.avatar || defaultAvatar
         }
       })
     }
@@ -252,6 +254,27 @@ const friendRequests = ref([])
 // 点击好友通知会话
 const getFriendApplicationList = async () => {
   friendRequests.value = await friendReqStore.getFriendApplicationList()
+  // 组装用户信息
+  try {
+    const userIds = friendRequests.value.map((item) => item.userID).filter((userID) => userID)
+    console.log('log.success.getFriendApplicationList.userIds', userIds)
+    if (userIds.length > 0) {
+      const resp = await api.batchGetUserInfo(userIds)
+      // 获取用户信息之后，使用 users 更新会话列表中的用户信息
+      const users = resp.data.profiles
+      console.log('log.success.getFriendApplicationList.users', users)
+      friendRequests.value.forEach((item) => {
+        const user = users.find((user) => user.user_id === item.userID)
+        if (user) {
+          item.showName = user.nick_name || user.user_name
+          item.faceURL = user.avatar || defaultAvatar
+        }
+      })
+      console.log('log.success.getFriendApplicationList.friendRequests', friendRequests.value)
+    }
+  } catch (e) {
+    console.log('log.error.getFriendApplicationList.index', e)
+  }
   updateFriendNotification()
 }
 
@@ -295,7 +318,7 @@ const refuseFriendApplication = (toUserID, handleMsg) => {
 const friendNotification = {
   id: 'friend-notification',
   showName: '好友通知',
-  faceURL: 'http://106.52.176.243:9000/go-backend/98104ba394b575034afd5e5354baaf1.jpg',
+  faceURL: friendReq,
   lastMessage: ``,
   time: new Date().toLocaleDateString(),
   isFriendNotification: true, // 用于标识这是好友通知会话
@@ -416,7 +439,7 @@ const onScroll = async (e) => {
             <div class="friend-request-list">
               <div v-for="request in friendRequests" :key="request.id" class="friend-request-item">
                 <div class="request-header">
-                  <a-avatar :size="40" :src="request.avatar" />
+                  <a-avatar :size="40" :src="request.faceURL" />
                   <div class="request-info">
                     <div class="request-name">{{ request.nickname }}</div>
                     <div class="request-time">{{ request.addTime }}</div>

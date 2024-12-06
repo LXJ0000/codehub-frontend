@@ -5,6 +5,7 @@ import { logoutApi } from '@/services/login'
 import router from '@/router'
 import { loginSms, refreshTokenAPI } from '@/services/login'
 import { IMSDK } from '@/utils/imCommon'
+import defaultAvatar from '@/assets/default_avatar.png'
 const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL
 const API_URL = import.meta.env.VITE_IM_API_URL
 const WS_URL = import.meta.env.VITE_IM_WS_URL
@@ -54,10 +55,14 @@ export const useUserStore = defineStore(
         })
         if (response.data.code === 0) {
           user.value = response.data.data.user_detail
+          if (user.value.avatar === '' || user.value.avatar === null) {
+            user.value.avatar = defaultAvatar
+          }
           accessToken.value = response.data.data.access_token
           refreshToken.value = response.data.data.refresh_token
           imToken.value = response.data.data.im_token
           userID.value = response.data.data.user_detail.user_id
+          console.log('log.login', user.value)
           await tryLogin()
           return true
         } else {
@@ -113,6 +118,16 @@ export const useUserStore = defineStore(
           refreshToken.value = null
           imToken.value = null
           userID.value = null
+
+          // 清除浏览器缓存
+          localStorage.clear()
+          sessionStorage.clear()
+          caches.keys().then((names) => {
+            for (let name of names) caches.delete(name)
+          })
+
+          IMSDK.logout()
+
           router.push('/login')
           return true
         } else {

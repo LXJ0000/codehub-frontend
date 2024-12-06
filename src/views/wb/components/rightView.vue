@@ -36,10 +36,10 @@
           <span class="stat-value">{{ user.postCount }}</span>
         </div>
       </div>
-      <a-button type="primary" block @click="showModal" style="border-radius: 16px"
+      <!-- <a-button type="primary" block @click="showModal" style="border-radius: 16px"
         >退出登录</a-button
-      >
-      <a-modal
+      > -->
+      <!-- <a-modal
         v-model:open="open"
         centered
         title="确定要退出登录吗？"
@@ -47,16 +47,17 @@
         v-model:width="modalWidth"
       >
         <p>该操作不可撤销！</p>
-      </a-modal>
+      </a-modal> -->
     </div>
 
     <div class="hot-topics">
       <div class="topics-header">
         <h3>悦联热搜</h3>
-        <a-button type="link" class="refresh-btn" style="border-radius: 16px">
+        <!-- <a-button type="link" class="refresh-btn" style="border-radius: 16px">
           <RefreshCw class="refresh-icon" />
           刷新
-        </a-button>
+        </a-button> -->
+        <RefreshCw class="refresh-icon" />
       </div>
 
       <a-list :dataSource="hotTopics" class="topics-list">
@@ -80,24 +81,24 @@ import { RefreshCw } from 'lucide-vue-next'
 import { fetchUserInfo } from '@/services/api'
 import { useUserStore } from '@/store/modules/user'
 import { useRouter } from 'vue-router'
-import { message } from 'ant-design-vue'
+// import { message } from 'ant-design-vue'
 
 const userStore = useUserStore()
 const router = useRouter()
-const open = ref(false)
-const modalWidth = ref(300)
-const showModal = () => {
-  open.value = true
-}
-const handleLogout = async () => {
-  try {
-    await userStore.logout()
-    message.success('退出登录成功')
-    router.push('/login')
-  } catch (error) {
-    message.error(error.message || '退出登录失败，请重试')
-  }
-}
+// const open = ref(false)
+// const modalWidth = ref(300)
+// const showModal = () => {
+//   open.value = true
+// }
+// const handleLogout = async () => {
+//   try {
+//     await userStore.logout()
+//     message.success('退出登录成功')
+//     router.push('/login')
+//   } catch (error) {
+//     message.error(error.message || '退出登录失败，请重试')
+//   }
+// }
 const isLogin = ref(false)
 const user = ref({})
 const hotTopics = ref([
@@ -286,6 +287,5 @@ onMounted(() => {
 
 .stat-value {
   font-weight: bold;
-  color: #333;
 }
 </style>

@@ -25,29 +25,36 @@
       </div>
 
       <div class="right-section">
-        <a-button type="primary" class="login-btn" style="border-radius: 16px">登录</a-button>
-        <a-button style="border-radius: 16px">注册</a-button>
-        <!-- <a-button class="icon-btn">
-          <Moon class="icon" />
-        </a-button>
-        <a-button class="icon-btn">
-          <Edit class="icon" />
-        </a-button> -->
+        <img :src="userStore.user.avatar" alt="User Avatar" class="nav-icon" />
+        <div class="nav-item" @click="showModal">
+          <!-- <home-outlined /> -->
+          <span>退出登录</span>
+          <!-- <MessageSquare class="icon"/> -->
+        </div>
       </div>
     </div>
   </header>
+
+  <a-modal
+    v-model:open="open"
+    centered
+    title="确定要退出登录吗？"
+    @ok="userStore.logout"
+    v-model:width="modalWidth"
+  >
+    <p>该操作不可撤销！</p>
+  </a-modal>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
-// import { Home, Flame, Video, Mail, User, Moon, Edit } from 'lucide-vue-next'
+import { useUserStore } from '@/store/modules/user'
 
 const searchText = ref('')
 const route = useRoute()
-
 const currentPath = computed(() => route.path)
-
+const userStore = useUserStore()
 const navItems = [
   { path: '/wb', name: '首页' },
   { path: '/qq', name: '聊天' },
@@ -55,6 +62,10 @@ const navItems = [
   { path: '/chat', name: 'AI' },
   { path: '/profile', name: '设置' },
 ]
+const open = ref(false)
+const showModal = () => {
+  open.value = true
+}
 </script>
 
 <style scoped>
@@ -140,9 +151,10 @@ const navItems = [
 }
 
 .nav-icon {
-  width: 20px;
-  height: 20px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
+  margin-right: 10px;
 }
 </style>

@@ -11,7 +11,7 @@
         <!-- <MidView /> -->
       </main>
 
-      <RightView />
+      <RightView class="right-view" />
     </div>
   </div>
 </template>
@@ -27,7 +27,6 @@ import RightView from './components/rightView.vue'
 <style>
 .app-container {
   min-height: 100vh;
-  background: #f2f2f2;
 }
 ::-webkit-scrollbar {
   width: 0px; /* 垂直滚动条的宽度 */
@@ -44,5 +43,15 @@ import RightView from './components/rightView.vue'
   margin-left: 210px;
   margin-right: 10px;
   min-width: 0;
+}
+
+.right-view {
+  display: block;
+}
+
+@media (max-width: 1185px) {
+  .right-view {
+    display: none;
+  }
 }
 </style>
