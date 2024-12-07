@@ -13,21 +13,21 @@ import MediaUploadModal from './components/MediaUploadModal.vue'
 import { CbEvents } from '@openim/wasm-client-sdk'
 import { IMSDK } from '@/utils/imCommon'
 import NavView from '@/components/navView.vue'
-import { LoadingOutlined } from '@ant-design/icons-vue'
-import { h } from 'vue'
+// import { LoadingOutlined } from '@ant-design/icons-vue'
+// import { h } from 'vue'
 import { useFriendReqStore } from '@/store/modules/friendReq'
 import * as api from '@/services/api'
 import friendReq from '@/assets/friend_req.png'
 import defaultAvatar from '@/assets/default_avatar.png'
 
-const indicator = h(LoadingOutlined, {
-  style: {
-    fontSize: '24px',
-    display: 'absolute',
-    left: '300px',
-  },
-  spin: true,
-})
+// const indicator = h(LoadingOutlined, {
+//   style: {
+//     fontSize: '24px',
+//     display: 'absolute',
+//     left: '300px',
+//   },
+//   spin: true,
+// })
 const friendReqStore = useFriendReqStore()
 const conversationStore = useConversationStore()
 const messageStore = useMessageStore()
@@ -499,7 +499,7 @@ const onScroll = async (e) => {
               </div>
             </div>
             <div class="message-list" ref="messageListRef" @scroll="onScroll">
-              <a-spin v-if="isScrollLoad" :indicator="indicator" />
+              <!-- <a-spin v-if="isScrollLoad" :indicator="indicator" /> -->
               <div v-for="msg in messages" :key="msg.id" :class="['message', msg.sender]">
                 <a-avatar v-if="msg.sender === 'other'" :src="msg.avatar" class="message-avatar" />
                 <div class="message-bubble">
