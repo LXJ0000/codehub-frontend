@@ -1,7 +1,7 @@
 <template>
   <div class="mid-view">
     <SubNavView />
-    <PostCreator />
+    <PostCreator @fetch-posts="fetchPosts" />
     <Feed :posts="posts" />
   </div>
 </template>

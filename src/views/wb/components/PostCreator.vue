@@ -1,13 +1,18 @@
 <template>
   <div class="main">
     <div class="max-w-2xl mx-auto">
-      <div class="bg-gray-50 rounded-lg p-4 mb-3">
+      <div class="bg-gray-50 rounded-lg p-4 mb-3 relative">
         <textarea
           v-model="postContent"
           placeholder="有什么新鲜事想分享给大家?"
           class="w-full bg-transparent border-none outline-none resize-none text-gray-700 placeholder-gray-500 text-sm"
-          rows="1"
+          :style="{ height: textareaHeight + 'px' }"
+          @input="adjustTextareaHeight"
+          ref="textarea"
         ></textarea>
+        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
+          {{ characterCount }} / 2000
+        </div>
       </div>
 
       <div class="flex items-center justify-between">
@@ -36,19 +41,9 @@
             <ZapIcon class="w-5 h-5" />
             <span class="ml-1 text-sm">头条文章</span>
           </button>
-
-          <!-- <button class="flex items-center text-gray-600 hover:text-gray-800">
-          <MoreHorizontalIcon class="w-5 h-5" />
-          <span class="ml-1 text-sm">更多</span>
-        </button> -->
         </div>
 
         <div class="flex items-center space-x-3">
-          <!-- <div class="flex items-center text-gray-600">
-          <ClockIcon class="w-4 h-4" />
-          <span class="ml-1 text-xs bg-orange-100 text-orange-500 px-1 rounded">安全</span>
-        </div> -->
-
           <div class="relative">
             <button
               @click="toggleDropdown"
@@ -63,10 +58,6 @@
               v-if="isDropdownOpen"
               class="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg py-2 z-10"
             >
-              <!-- <div class="flex justify-between items-center px-4 py-2 border-b border-gray-100">
-                <span class="text-gray-800">公开</span>
-                <ChevronRightIcon class="w-4 h-4 text-gray-400" />
-              </div> -->
               <button
                 v-for="option in privacyOptions"
                 :key="option"
@@ -79,7 +70,12 @@
           </div>
 
           <button
-            class="px-6 py-1.5 bg-[#FFCBA4] hover:bg-[#FFB380] text-white rounded-full transition-colors"
+            :class="[
+              'px-6 py-1.5 text-white rounded-full transition-colors',
+              postContent ? 'bg-[#FB8204] hover:bg-[#FB5F0C]' : 'bg-[#FFCBA4] cursor-not-allowed',
+            ]"
+            :disabled="!postContent"
+            @click="sendPost"
           >
             发送
           </button>
@@ -90,24 +86,34 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import {
   Smile as SmileIcon,
   Image as ImageIcon,
   Video as VideoIcon,
   Hash as HashIcon,
   Zap as ZapIcon,
-  //   MoreHorizontal as MoreHorizontalIcon,
-  //   Clock as ClockIcon,
   ChevronDown as ChevronDownIcon,
-  // ChevronRight as ChevronRightIcon,
 } from 'lucide-vue-next'
+import { message } from 'ant-design-vue'
+import * as api from '@/services/api'
+import { defineEmits } from 'vue'
+
+const emit = defineEmits(['fetch-posts']) // 父子组件传递函数示例
+
+const fetchPosts = () => {
+  emit('fetch-posts')
+}
 
 const postContent = ref('')
 const isDropdownOpen = ref(false)
 const selectedPrivacy = ref('公开')
+const textareaHeight = ref(24) // Initial height (1 line)
+const textarea = ref(null)
 
 const privacyOptions = ['公开', '粉丝', '好友圈', '仅自己可见', '群可见']
+
+const characterCount = computed(() => postContent.value.length)
 
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value
@@ -116,6 +122,29 @@ const toggleDropdown = () => {
 const selectPrivacy = (option) => {
   selectedPrivacy.value = option
   isDropdownOpen.value = false
+}
+
+const adjustTextareaHeight = () => {
+  const element = textarea.value
+  element.style.height = 'auto'
+  element.style.height = element.scrollHeight + 'px'
+  textareaHeight.value = element.scrollHeight
+}
+
+const sendPost = async () => {
+  if (postContent.value) {
+    try {
+      const response = await api.submitPost(postContent.value)
+      if (response.code === 0) {
+        message.success('发布成功')
+        postContent.value = ''
+        fetchPosts()
+      }
+    } catch (error) {
+      console.error('Error submitting post:', error)
+      message.error('发布失败')
+    }
+  }
 }
 
 // Close dropdown when clicking outside
