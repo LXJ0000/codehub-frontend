@@ -10,7 +10,6 @@ const theme = {
 <template>
   <a-config-provider :theme="theme" :locale="zhCN">
     <router-view />
-    
   </a-config-provider>
 </template>
 

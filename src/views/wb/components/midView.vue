@@ -1,6 +1,7 @@
 <template>
   <div class="mid-view">
-    <SubNavView></SubNavView>
+    <SubNavView />
+    <PostCreator />
     <Feed :posts="posts" />
   </div>
 </template>
@@ -11,6 +12,7 @@ import * as api from '@/services/api'
 
 import Feed from './FeedView.vue'
 import SubNavView from './SubNavView.vue'
+import PostCreator from './PostCreator.vue'
 
 const currentUser = ref({
   id: '',
