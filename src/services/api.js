@@ -60,7 +60,7 @@ export const collectPost = (postId, isCollect) => {
 }
 
 // 发布新动态
-export const submitPost = (content, title = 'title', status = 'publish', abstract = 'abstract') => {
+export const submitPost = (content, title = 'title', status = 'publish', abstract = '') => {
   return request('/post', 'POST', { title, content: content, status, abstract })
 }
 
