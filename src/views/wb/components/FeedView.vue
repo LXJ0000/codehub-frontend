@@ -18,14 +18,13 @@
             <ChevronDown class="dropdown-icon" />
           </button>
           <div v-if="activeDropdown === index" class="dropdown-content">
+            <button v-if="isOwnPost(post)" class="dropdown-item">置顶</button>
             <button @click="sharePost(post)" class="dropdown-item">分享</button>
             <button @click="collectPost(post)" class="dropdown-item">收藏</button>
             <button @click="promotePost(post)" class="dropdown-item">帮上头条</button>
-            <button
-              v-if="isOwnPost(post)"
-              @click="deletePost(post)"
-              class="dropdown-item text-red-500"
-            >
+            <button v-if="isOwnPost(post)" class="dropdown-item">转为仅粉丝可见</button>
+            <button v-if="isOwnPost(post)" class="dropdown-item">转为仅自己可见</button>
+            <button v-if="isOwnPost(post)" @click="deletePost(post)" class="dropdown-item">
               删除
             </button>
           </div>
@@ -213,6 +212,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 .feed {
   display: flex;
   flex-direction: column;
@@ -311,7 +313,7 @@ onUnmounted(() => {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  min-width: 120px;
+  min-width: 140px;
   z-index: 1000;
 }
 
