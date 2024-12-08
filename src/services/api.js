@@ -35,8 +35,8 @@ export const fetchPosts = (author_id = 0, last = -1, size = 10) => {
 }
 
 // 获取本人帖子列表
-export const fetchWriterPosts = (page = 1, size = 10) => {
-  return request('/post/writer', 'GET', { page, size })
+export const fetchWriterPosts = (last = -1, size = 10) => {
+  return request('/post/writer', 'GET', { last, size })
 }
 
 // 点赞动态
