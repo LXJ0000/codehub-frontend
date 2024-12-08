@@ -30,9 +30,8 @@ export const batchGetUserInfo = (userIds) => {
 // === 帖子相关接口 ===
 
 // 获取用户动态列表
-export const fetchPosts = (author_id = 0, page = 1, size = 10) => {
-  console.log('log.fetchPosts', author_id, page, size)
-  return request('/post/reader', 'GET', { author_id, page, size })
+export const fetchPosts = (author_id = 0, last = -1, size = 10) => {
+  return request('/post/reader', 'GET', { author_id, last, size })
 }
 
 // 获取本人帖子列表

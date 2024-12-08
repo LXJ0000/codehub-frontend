@@ -4,7 +4,7 @@
       <SubNavView />
     </div>
     <div class="mid-content">
-      <PostCreator @fetch-posts="fetchPosts" />
+      <PostCreator @fetch-posts="fetchPosts" @remove-last="removeLast" />
       <Feed :posts="posts" @delete-post="handleDeletePost" />
     </div>
   </div>
@@ -21,9 +21,11 @@ import PostCreator from './PostCreator.vue'
 const posts = ref([])
 const showSubNav = ref(true)
 let lastScrollTop = 0
-
+let currentPage = 1
+let last = -1
 const handleScroll = () => {
-  const st = window.pageYOffset || document.documentElement.scrollTop
+  const st = document.documentElement.scrollTop
+  console.log(st)
   if (st > lastScrollTop) {
     // Scrolling down
     showSubNav.value = false
@@ -32,19 +34,28 @@ const handleScroll = () => {
     showSubNav.value = true
   }
   lastScrollTop = st <= 0 ? 0 : st
+  if (st > currentPage * 878) {
+    currentPage++
+    fetchPosts()
+  }
 }
 
-const fetchPosts = async (page = 1) => {
+const removeLast = () => {
+  last = -1
+}
+
+const fetchPosts = async () => {
   try {
-    const response = await api.fetchPosts(0, page)
+    const response = await api.fetchPosts(0, last)
     if (response.code === 0) {
-      posts.value = response.data.post_list.map((item) => ({
+      const current = response.data.post_list.map((item) => ({
         id: item.post.post_id,
         title: item.post.title,
         content: item.post.content,
         abstract: item.post.abstract,
         authorId: item.post.author.user_id,
         createdAt: new Date(item.post.created_at * 1000).toLocaleString(),
+        created_at: item.post.created_at,
         status: item.post.status,
         liked: item.stat.liked,
         collected: item.stat.collected,
@@ -57,6 +68,12 @@ const fetchPosts = async (page = 1) => {
         authorName: item.post.author.nick_name || item.post.author.user_name,
         comment_count: item.comment_count,
       }))
+      if (posts.value && last != -1) {
+        posts.value = [...posts.value, ...current]
+      } else {
+        posts.value = [...current]
+      }
+      last = current[current.length - 1].created_at
     }
   } catch (error) {
     console.error('Error fetching posts:', error)
@@ -89,7 +106,8 @@ onUnmounted(() => {
 
 .sub-nav-wrapper {
   position: sticky;
-  top: 60px; /* Adjust this value based on your main NavView height */
+  top: 60px;
+  /* Adjust this value based on your main NavView height */
   z-index: 10;
   background-color: #fff;
   transition: transform 0.3s ease-in-out;

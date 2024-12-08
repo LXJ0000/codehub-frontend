@@ -107,6 +107,10 @@ const fetchPosts = () => {
   emit('fetch-posts')
 }
 
+const removeLast = () => {
+  emit('remove-last')
+}
+
 const postContent = ref('')
 const isDropdownOpen = ref(false)
 const selectedPrivacy = ref('公开')
@@ -140,6 +144,7 @@ const sendPost = async () => {
       if (response.code === 0) {
         message.success('发布成功')
         postContent.value = ''
+        removeLast()
         fetchPosts()
       }
     } catch (error) {
