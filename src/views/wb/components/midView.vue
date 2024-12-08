@@ -17,12 +17,15 @@ import * as api from '@/services/api'
 import Feed from './FeedView.vue'
 import SubNavView from './SubNavView.vue'
 import PostCreator from './PostCreator.vue'
+import { message } from 'ant-design-vue'
 
 const posts = ref([])
 const showSubNav = ref(true)
 let lastScrollTop = 0
 let currentPage = 1
 let last = -1
+let hasMorePosts = true
+
 const handleScroll = () => {
   const st = document.documentElement.scrollTop
   console.log(st)
@@ -34,9 +37,16 @@ const handleScroll = () => {
     showSubNav.value = true
   }
   lastScrollTop = st <= 0 ? 0 : st
-  if (st > currentPage * 878) {
-    currentPage++
-    fetchPosts()
+  if (st > currentPage * 600) {
+    if (hasMorePosts) {
+      currentPage++
+      fetchPosts()
+    } else {
+      // 如果鼠标滚动到底部，提示没有更多数据了
+      if (document.documentElement.scrollHeight - document.documentElement.clientHeight === st) {
+        message.info('没有更多了')
+      }
+    }
   }
 }
 
@@ -68,6 +78,10 @@ const fetchPosts = async () => {
         authorName: item.post.author.nick_name || item.post.author.user_name,
         comment_count: item.comment_count,
       }))
+      if (current.length < 10) {
+        // default size is 10
+        hasMorePosts = false
+      }
       if (posts.value && last != -1) {
         posts.value = [...posts.value, ...current]
       } else {

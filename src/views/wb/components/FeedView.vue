@@ -64,7 +64,7 @@
         :total-comments="post.totalComments"
         :post-id="post.id"
         @load-more="loadMoreComments(post)"
-        @add-total-comment="post.totalComments += 1"
+        @add-total-comment="(post.totalComments += 1), (post.comment_count += 1)"
       />
     </div>
   </div>
