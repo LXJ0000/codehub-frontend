@@ -66,7 +66,8 @@
               {{ comment.user_profile.nick_name || comment.user_profile.user_name }}
             </span>
           </div>
-          <p class="comment-text">{{ comment.content }}</p>
+          <p :class="{ 'comment-text': true, 'double-line': !comment.isAppend }" ref="commentParagraphs">{{ comment.content }}</p>
+          <a v-if="comment.content.length>60" style="text-decoration: none; color: #69b4ff; font-size: 12px; " href="javascript:void(0)" @click="handleOver(index)">{{comment.isAppend ? '点击收起' : '点击展开'}}</a>
           <div class="comment-footer">
             <span class="comment-time">{{ formatTime(comment.created_at) }}</span>
             <div class="comment-actions">
@@ -130,7 +131,7 @@
                     {{ reply.user_profile.nick_name || reply.user_profile.user_name }}
                   </span>
                 </div>
-                <p class="reply-text">{{ reply.content }}</p>
+                <p class="reply-text double-line">{{ reply.content }}</p>
                 <div class="reply-footer">
                   <span class="reply-time">{{ formatTime(reply.created_at) }}</span>
                   <div class="reply-actions">
@@ -170,7 +171,6 @@ import { useUserStore } from '@/store/modules/user'
 import * as api from '@/services/api'
 
 const userStore = useUserStore()
-
 const { comments, totalComments, postId } = defineProps({
   comments: {
     type: Array,
@@ -210,7 +210,10 @@ const formatTime = (timestamp) => {
   const date = new Date(timestamp * 1000)
   return date.toLocaleString()
 }
-
+const handleOver = (index) => {
+  console.log('回复列表', sortedComments.value[0])
+  sortedComments.value[index].isAppend = !sortedComments.value[index].isAppend
+}
 const changeSort = (sortType) => {
   currentSort.value = sortType
 }
@@ -229,6 +232,9 @@ watchEffect(() => {
 
 const sortedComments = computed(() => {
   const sorted = [...localComments.value]
+  sorted.forEach((item) => {
+    item.isAppend = false
+  })
   switch (currentSort.value) {
     case 'desc':
       return sorted.reverse()
@@ -472,6 +478,9 @@ const goToUserProfile = (userId) => {
 
 .comment-text {
   font-size: 14px;
+  padding-top: 5px;
+  padding-bottom: 0px;
+  /* margin-top: 10px; */
   margin: 0;
   color: #333;
 }
@@ -619,5 +628,12 @@ const goToUserProfile = (userId) => {
 
 .view-more-btn:hover {
   background: #f5f5f5;
+}
+.double-line {
+  word-break: break-all;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 </style>
