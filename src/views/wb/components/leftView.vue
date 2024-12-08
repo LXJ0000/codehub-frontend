@@ -1,66 +1,56 @@
 <template>
-  <aside class="left-sidebar">
-    <a-menu mode="inline" :selectedKeys="[selectedKey]">
-      <a-menu-item v-for="item in menuItems" :key="item.key">
-        <img
-          src="https://tvax1.sinaimg.cn/crop.0.0.1079.1079.180/006UebRdly8hket8gaah4j30tz0tzmz2.jpg?KID=imgbed,tva&Expires=1731430147&ssig=4qtJVzbHnZ"
-          class="menu-icon"
-          alt=""
-        />
-        <span>{{ item.label }}</span>
-      </a-menu-item>
-    </a-menu>
-  </aside>
+  <div class="main">
+    <nav class="bg-white p-2 pl-1">
+      <h2 class="text-xl mb-4">推荐</h2>
+
+      <div class="space-y-1">
+        <a href="#" class="flex items-center text-md hover:bg-gray-50 rounded-lg p-2">
+          <FlameIcon class="w-5 h-5 text-orange-500 mr-3" />
+          <span>热门推荐</span>
+        </a>
+
+        <a href="#" class="flex items-center text-md hover:bg-gray-50 rounded-lg p-2">
+          <ClockIcon class="w-5 h-5 text-gray-400 mr-3" />
+          <span>热门榜单</span>
+        </a>
+
+        <div class="space-y-0">
+          <div class="flex items-center text-md p-2">
+            <SearchIcon class="w-5 h-5 text-gray-400 mr-3" />
+            <span>微博热搜</span>
+          </div>
+
+          <a href="#" class="block text-sm hover:bg-gray-50 rounded-lg p-2 pl-10 ml-0">我的</a>
+          <a href="#" class="block text-sm hover:bg-gray-50 rounded-lg p-2 pl-10 ml-0">热搜</a>
+          <a href="#" class="block text-sm hover:bg-gray-50 rounded-lg p-2 pl-10 ml-0">文娱</a>
+          <a href="#" class="block text-sm hover:bg-gray-50 rounded-lg p-2 pl-10 ml-0">要闻</a>
+        </div>
+      </div>
+    </nav>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Flame, Clock, Search, User, TrendingUp, Star, MoreHorizontal } from 'lucide-vue-next'
-
-const selectedKey = ref('hot-recommend')
-
-const menuItems = [
-  { key: 'hot-recommend', label: '热门推荐', icon: Flame },
-  { key: 'hot-list', label: '热门榜单', icon: Clock },
-  { key: 'hot-search', label: '悦联热搜', icon: Search },
-  { key: 'my', label: '我的', icon: User },
-  { key: 'hot-topics', label: '热搜', icon: TrendingUp },
-  { key: 'entertainment', label: '文娱', icon: Star },
-  { key: 'more', label: '更多', icon: MoreHorizontal },
-]
+import { FlameIcon, ClockIcon, SearchIcon } from 'lucide-vue-next'
 </script>
 
 <style scoped>
-.left-sidebar {
-  width: 200px;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+.main {
+  width: 188px;
   background: #fff;
   border-radius: 8px;
   height: calc(100vh - 70px);
-  position: fixed;
+  /* position: fixed; */
   overflow-y: auto;
   padding: 20px 10px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
-
-.menu-icon {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  margin-right: 8px;
-  object-fit: cover;
-}
-
-:deep(.ant-menu-item) {
-  height: 40px;
-  line-height: 40px;
-  padding: 0 16px;
-}
-
-:deep(.ant-menu-item-selected) {
-  background-color: #f0f7ff !important;
-  color: #a5d5ff !important;
-}
-
-:deep(.ant-menu-light) {
-  border-inline-end-width: 0px !important;
+a {
+  text-decoration: none;
 }
 </style>

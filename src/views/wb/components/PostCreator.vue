@@ -72,7 +72,9 @@
           <button
             :class="[
               'px-6 py-1.5 text-white rounded-full transition-colors',
-              postContent ? 'bg-[#FB8204] hover:bg-[#FB5F0C]' : 'bg-[#FFCBA4] cursor-not-allowed',
+              postContent
+                ? 'bg-[var(--accent-100)] hover:bg-[var(--accent-200)]'
+                : 'bg-[var(--primary-100)] cursor-not-allowed',
             ]"
             :disabled="!postContent"
             @click="sendPost"

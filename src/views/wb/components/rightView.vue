@@ -149,6 +149,8 @@ onMounted(() => {
 
 <style scoped>
 .right-sidebar {
+  margin-left: 5px;
+  margin-right: 5px;
   width: 300px;
   position: sticky;
   top: 90px;

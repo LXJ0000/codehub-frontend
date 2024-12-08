@@ -1,62 +1,40 @@
 <template>
   <div class="mid-view">
-    <SubNavView />
-    <PostCreator @fetch-posts="fetchPosts" />
-    <Feed :posts="posts" />
+    <div class="sub-nav-wrapper" :class="{ 'sub-nav-hidden': !showSubNav }">
+      <SubNavView />
+    </div>
+    <div class="mid-content">
+      <PostCreator @fetch-posts="fetchPosts" />
+      <Feed :posts="posts" />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import * as api from '@/services/api'
 
 import Feed from './FeedView.vue'
 import SubNavView from './SubNavView.vue'
 import PostCreator from './PostCreator.vue'
 
-const currentUser = ref({
-  id: '',
-  avatar: '',
-  name: '',
-  followingCount: 0,
-  followerCount: 0,
-  postCount: 0,
-})
-
 const posts = ref([])
+const showSubNav = ref(true)
+let lastScrollTop = 0
 
-const fetchUserInfo = async () => {
-  try {
-    const response = await api.fetchUserInfo()
-    // const response = await request('/user/profile', 'GET')
-    if (response.code === 0) {
-      currentUser.value.followingCount = response.data.profile.relation_stat.followee
-      currentUser.value.followerCount = response.data.profile.relation_stat.follower
-      currentUser.value.postCount = response.data.profile.post_cnt
-      currentUser.value.name = response.data.profile.nick_name
-        ? response.data.profile.nick_name
-        : response.data.profile.user_name
-      currentUser.value.avatar = response.data.profile.avatar
-      currentUser.value.birthday = response.data.profile.birthday
-      currentUser.value.about_me = response.data.profile.about_me
-      currentUser.value.email = response.data.profile.email
-      currentUser.value.id = response.data.profile.relation_stat.user_id
-    }
-  } catch (error) {
-    console.error('Error fetching user info:', error)
+const handleScroll = () => {
+  const st = window.pageYOffset || document.documentElement.scrollTop
+  if (st > lastScrollTop) {
+    // Scrolling down
+    showSubNav.value = false
+  } else {
+    // Scrolling up
+    showSubNav.value = true
   }
+  lastScrollTop = st <= 0 ? 0 : st
 }
-
-const pagination = {
-  onChange: (page) => {
-    fetchPosts(page)
-  },
-  pageSize: 10,
-}
-const loading = ref(false)
 
 const fetchPosts = async (page = 1) => {
-  loading.value = true
   try {
     const response = await api.fetchPosts(0, page)
     if (response.code === 0) {
@@ -73,33 +51,45 @@ const fetchPosts = async (page = 1) => {
         likeCount: item.interaction.like_cnt,
         collectCount: item.interaction.collect_cnt,
         readCount: item.interaction.read_cnt,
-        authorAvatar: item.post.author.avatar
-          ? item.post.author.avatar
-          : 'https://avatars.githubusercontent.com/u/98313822?u=b615bc340136ea9f06cec4e05f0aee6b00118f82&v=4', // 你可能需要从其他地方获取作者头像
-        authorName: item.post.author.nick_name
-          ? item.post.author.nick_name
-          : item.post.author.user_name,
+        authorAvatar:
+          item.post.author.avatar ||
+          'https://avatars.githubusercontent.com/u/98313822?u=b615bc340136ea9f06cec4e05f0aee6b00118f82&v=4',
+        authorName: item.post.author.nick_name || item.post.author.user_name,
         comment_count: item.comment_count,
       }))
-      // 更新分页信息
-      pagination.total = response.data.count
     }
   } catch (error) {
     console.error('Error fetching posts:', error)
-  } finally {
-    loading.value = false
   }
 }
 
 onMounted(() => {
-  fetchUserInfo()
   fetchPosts()
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
 <style scoped>
 .mid-view {
-  width: 600px;
+  width: 100%;
+  max-width: 600px;
   margin: 0 auto;
+}
+
+.sub-nav-wrapper {
+  position: sticky;
+  top: 60px; /* Adjust this value based on your main NavView height */
+  z-index: 10;
+  background-color: #fff;
+  transition: transform 0.3s ease-in-out;
+  box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.1);
+}
+
+.sub-nav-hidden {
+  transform: translateY(-100%);
 }
 </style>
