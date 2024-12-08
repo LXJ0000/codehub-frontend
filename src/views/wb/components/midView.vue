@@ -37,7 +37,9 @@ const handleScroll = () => {
     showSubNav.value = true
   }
   lastScrollTop = st <= 0 ? 0 : st
-  if (st > currentPage * 600) {
+
+  const triggerHeight = window.innerHeight * 0.9 // 1.5 times the viewport height
+  if (st > currentPage * triggerHeight) {
     if (hasMorePosts) {
       currentPage++
       fetchPosts()
@@ -102,11 +104,13 @@ const handleDeletePost = (postId) => {
 }
 
 onMounted(() => {
+  removeLast()
   fetchPosts()
   window.addEventListener('scroll', handleScroll)
 })
 
 onUnmounted(() => {
+  removeLast()
   window.removeEventListener('scroll', handleScroll)
 })
 </script>
