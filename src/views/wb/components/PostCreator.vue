@@ -150,6 +150,9 @@ const sendPost = async () => {
     } catch (error) {
       console.error('Error submitting post:', error)
       message.error('发布失败')
+    } finally {
+      // Reset textarea height
+      textareaHeight.value = 24
     }
   }
 }
