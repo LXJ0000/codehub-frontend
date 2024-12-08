@@ -34,6 +34,10 @@
           <ShareAltOutlined style="font-size: 14px" />
           <span>分享</span>
         </button>
+        <button @click="deletePost(post)">
+          <ShareAltOutlined style="font-size: 14px" />
+          <span>删除</span>
+        </button>
       </div>
 
       <!-- 评论区域 -->
@@ -53,6 +57,8 @@
 import { message } from 'ant-design-vue'
 import CommentView from './CommentView.vue'
 import * as api from '@/services/api'
+
+const emit = defineEmits(['delete-post'])
 
 const { posts } = defineProps({
   posts: {
@@ -109,6 +115,20 @@ const collectPost = async (post) => {
 const sharePost = (post) => {
   console.log('Sharing post:', post)
   message.info('分享功能暂未实现')
+}
+
+const deletePost = async (post) => {
+  try {
+    const response = await api.deletePost(post.id)
+    if (response.code === 0) {
+      message.success('删除成功')
+      emit('delete-post', post.id)
+    } else {
+      message.error('删除失败')
+    }
+  } catch (error) {
+    message.error('删除失败')
+  }
 }
 
 const loadMoreComments = async (post) => {

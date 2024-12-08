@@ -70,6 +70,11 @@ export const submitNewPost = (postData) => {
   return request('/post', 'POST', postData)
 }
 
+// 删除动态
+export const deletePost = (postId) => {
+  return request('/post.delete', 'POST', { post_id: postId })
+}
+
 // 发表一级评论
 export const submitComment = (postId, content) => {
   return request('/comment', 'POST', { biz: 'post', biz_id: postId, content: content })

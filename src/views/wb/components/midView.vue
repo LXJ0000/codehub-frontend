@@ -5,7 +5,7 @@
     </div>
     <div class="mid-content">
       <PostCreator @fetch-posts="fetchPosts" />
-      <Feed :posts="posts" />
+      <Feed :posts="posts" @delete-post="handleDeletePost" />
     </div>
   </div>
 </template>
@@ -60,6 +60,13 @@ const fetchPosts = async (page = 1) => {
     }
   } catch (error) {
     console.error('Error fetching posts:', error)
+  }
+}
+
+const handleDeletePost = (postId) => {
+  const index = posts.value.findIndex((p) => p.id === postId)
+  if (index !== -1) {
+    posts.value.splice(index, 1)
   }
 }
 
