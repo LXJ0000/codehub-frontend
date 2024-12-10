@@ -79,6 +79,17 @@ const fetchPosts = async () => {
           'https://avatars.githubusercontent.com/u/98313822?u=b615bc340136ea9f06cec4e05f0aee6b00118f82&v=4',
         authorName: item.post.author.nick_name || item.post.author.user_name,
         comment_count: item.comment_count,
+        images: [
+          // 'http://106.52.176.243:9000/go-backend/545be25667f10f3f16592688d6613e9.jpg',
+          // 'http://106.52.176.243:9000/go-backend/545be25667f10f3f16592688d6613e9.jpg',
+          // 'http://106.52.176.243:9000/go-backend/545be25667f10f3f16592688d6613e9.jpg',
+          // 'http://106.52.176.243:9000/go-backend/545be25667f10f3f16592688d6613e9.jpg',
+          // 'http://106.52.176.243:9000/go-backend/545be25667f10f3f16592688d6613e9.jpg',
+          // 'http://106.52.176.243:9000/go-backend/545be25667f10f3f16592688d6613e9.jpg',
+          // 'http://106.52.176.243:9000/go-backend/545be25667f10f3f16592688d6613e9.jpg',
+          // 'http://106.52.176.243:9000/go-backend/545be25667f10f3f16592688d6613e9.jpg',
+          // 'http://106.52.176.243:9000/go-backend/545be25667f10f3f16592688d6613e9.jpg',
+        ],
       }))
       if (current.length < 10) {
         // default size is 10
