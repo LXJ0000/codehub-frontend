@@ -11,6 +11,10 @@ export const fetchUserInfo = () => {
 export const getUserInfo = (user_id) => {
   return request('/user', 'GET', { user_id })
 }
+// 获取用户信息
+export const editUserInfo = (data) => {
+  return request('/user/edit', 'POST', data)
+}
 
 // 搜索用户：关键字模糊查询
 export const searchPosts = (query) => {
