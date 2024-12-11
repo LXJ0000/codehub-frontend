@@ -20,6 +20,9 @@ importers:
       axios:
         specifier: ^1.7.7
         version: 1.7.7
+      emoji-mart-vue-fast:
+        specifier: ^15.0.3
+        version: 15.0.3(vue@3.5.8)
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
@@ -50,6 +53,9 @@ importers:
       vue-router:
         specifier: ^4.3.3
         version: 4.4.5(vue@3.5.8)
+      vue3-emoji-picker:
+        specifier: ^1.1.8
+        version: 1.1.8
     devDependencies:
       '@rushstack/eslint-patch':
         specifier: ^1.8.0
@@ -645,6 +651,9 @@ packages:
   '@polka/url@1.0.0-next.28':
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
 
+  '@popperjs/core@2.11.8':
+    resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
+
   '@rollup/pluginutils@5.1.2':
     resolution: {integrity: sha512-/FIdS3PyZ39bjZlwqFnWqCOVnW7o963LtKMwQOD0NhQqw22gSr2YY1afu3FxRip4ZCZNsD5jq6Aaz6QV3D/Njw==}
     engines: {node: '>=14.0.0'}
@@ -1208,6 +1217,11 @@ packages:
   electron-to-chromium@1.5.29:
     resolution: {integrity: sha512-PF8n2AlIhCKXQ+gTpiJi0VhcHDb69kYX4MtCiivctc2QD3XuNZ/XIOlbGzt7WAjjEev0TtaH6Cu3arZExm5DOw==}
 
+  emoji-mart-vue-fast@15.0.3:
+    resolution: {integrity: sha512-PBCzUb2iSLIF8LBHvp63vB3EWhrpGs0fg2JcHnHVKVNFOQeahkbU2NpkCtwFFa/Ed3ODKGUG9mcTzws4owxj4w==}
+    peerDependencies:
+      vue: '>2.0.0'
+
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
 
@@ -1491,6 +1505,9 @@ packages:
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
+
+  idb@7.1.1:
+    resolution: {integrity: sha512-gchesWBzyvGHRO9W8tzUWFDycow5gwjvFKfyV9FF32Y7F50yZMp7mP+T2mJIWFx49zicqyC4uefHM17o6xKIVQ==}
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
@@ -2411,6 +2428,10 @@ packages:
     peerDependencies:
       vue: ^3.0.0
 
+  vue3-emoji-picker@1.1.8:
+    resolution: {integrity: sha512-k9tVHeQEBVLzVCLYAkFaI1nib3FJFQwdPhWD5khJkhks3ktg3g12z5wPGOSDpIuSLNtelRGvq1qdmZuJu5khfA==}
+    engines: {node: '>=16.0.0'}
+
   vue@3.5.8:
     resolution: {integrity: sha512-hvuvuCy51nP/1fSRvrrIqTLSvrSyz2Pq+KQ8S8SXCxTWVE0nMaOnSDnSOxV1eYmGfvK7mqiwvd1C59CEEz7dAQ==}
     peerDependencies:
@@ -2966,6 +2987,8 @@ snapshots:
   '@pkgr/core@0.1.1': {}
 
   '@polka/url@1.0.0-next.28': {}
+
+  '@popperjs/core@2.11.8': {}
 
   '@rollup/pluginutils@5.1.2(rollup@4.22.4)':
     dependencies:
@@ -3582,6 +3605,12 @@ snapshots:
 
   electron-to-chromium@1.5.29: {}
 
+  emoji-mart-vue-fast@15.0.3(vue@3.5.8):
+    dependencies:
+      '@babel/runtime': 7.25.6
+      core-js: 3.38.1
+      vue: 3.5.8
+
   emoji-regex@8.0.0: {}
 
   emoji-regex@9.2.2: {}
@@ -3943,6 +3972,8 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
     optional: true
+
+  idb@7.1.1: {}
 
   ignore@5.3.2: {}
 
@@ -4828,6 +4859,14 @@ snapshots:
     dependencies:
       is-plain-object: 3.0.1
       vue: 3.5.8
+
+  vue3-emoji-picker@1.1.8:
+    dependencies:
+      '@popperjs/core': 2.11.8
+      idb: 7.1.1
+      vue: 3.5.8
+    transitivePeerDependencies:
+      - typescript
 
   vue@3.5.8:
     dependencies:

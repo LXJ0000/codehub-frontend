@@ -44,10 +44,20 @@
 
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-6">
-          <button class="flex items-center text-gray-600 hover:text-gray-800">
-            <SmileIcon class="w-5 h-5" />
-            <span class="ml-1 text-sm">表情</span>
-          </button>
+          <div class="relative">
+            <button
+              class="flex items-center text-gray-600 hover:text-gray-800"
+              @click="toggleEmojiPicker"
+            >
+              <SmileIcon class="w-5 h-5" />
+              <span class="ml-1 text-sm">表情</span>
+            </button>
+            <EmojiPicker
+              :is-visible="isEmojiPickerVisible"
+              @select-emoji="handleEmojiSelect"
+              @close="closeEmojiPicker"
+            />
+          </div>
 
           <button
             class="flex items-center text-gray-600 hover:text-gray-800"
@@ -126,7 +136,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import {
   Smile as SmileIcon,
   Image as ImageIcon,
@@ -139,6 +149,7 @@ import {
 } from 'lucide-vue-next'
 import { message } from 'ant-design-vue'
 import * as api from '@/services/api'
+import EmojiPicker from '@/components/EmojiPicker.vue'
 
 const emit = defineEmits(['fetch-posts', 'remove-last'])
 
@@ -149,6 +160,7 @@ const textareaHeight = ref(24)
 const textarea = ref()
 const fileInput = ref()
 const uploadedImages = ref([])
+const isEmojiPickerVisible = ref(false)
 
 const privacyOptions = ['公开', '粉丝', '好友圈', '仅自己可见', '群可见']
 
@@ -227,10 +239,33 @@ const sendPost = async () => {
   }
 }
 
-// Close dropdown when clicking outside
+const toggleEmojiPicker = () => {
+  isEmojiPickerVisible.value = !isEmojiPickerVisible.value
+}
+
+const closeEmojiPicker = () => {
+  isEmojiPickerVisible.value = false
+}
+
+const handleEmojiSelect = (emoji) => {
+  const textareaEl = textarea.value
+  const start = textareaEl.selectionStart
+  const end = textareaEl.selectionEnd
+  const text = postContent.value
+  postContent.value = text.substring(0, start) + emoji + text.substring(end)
+  closeEmojiPicker()
+
+  nextTick(() => {
+    textareaEl.selectionStart = textareaEl.selectionEnd = start + emoji.length
+    textareaEl.focus()
+  })
+}
+
+// Close dropdown and emoji picker when clicking outside
 const handleClickOutside = (event) => {
   if (!event.target.closest('.relative')) {
     isDropdownOpen.value = false
+    closeEmojiPicker()
   }
 }
 
