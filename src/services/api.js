@@ -39,8 +39,8 @@ export const fetchPosts = (author_id = 0, last = -1, size = 10) => {
 }
 
 // 获取本人帖子列表
-export const fetchWriterPosts = (page = 1, size = 10) => {
-  return request('/post/writer', 'GET', { page, size })
+export const fetchWriterPosts = (last = -1, size = 10) => {
+  return request('/post/writer', 'GET', { last, size })
 }
 
 // 点赞动态
@@ -63,9 +63,13 @@ export const collectPost = (postId, isCollect) => {
   })
 }
 
+// // 发布新动态
+// export const submitPost = (content, title = 'title', status = 'publish', abstract = '') => {
+//   return request('/post', 'POST', { title, content: content, status, abstract })
+// }
 // 发布新动态
-export const submitPost = (content, title = 'title', status = 'publish', abstract = 'abstract') => {
-  return request('/post', 'POST', { title, content: content, status, abstract })
+export const submitPost = (formData) => {
+  return request('/post', 'POST', formData)
 }
 
 // 发布新内容（用于模态框提交）

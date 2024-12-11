@@ -31,8 +31,15 @@
         </div>
       </div>
       <p class="post-content">{{ post.content }}</p>
-      <div v-if="post.image" class="post-image">
-        <img :src="post.image" alt="Post Image" />
+      <div v-if="post.images && post.images.length" class="post-images">
+        <div v-if="post.images.length === 1" class="single-image">
+          <img :src="post.images[0]" alt="Post Image" />
+        </div>
+        <div v-else class="image-grid">
+          <div v-for="(image, index) in post.images.slice(0, 9)" :key="index" class="grid-item">
+            <img :src="image" alt="Post Image" />
+          </div>
+        </div>
       </div>
       <div class="post-actions">
         <button @click="likePost(post)">
@@ -64,7 +71,7 @@
         :total-comments="post.totalComments"
         :post-id="post.id"
         @load-more="loadMoreComments(post)"
-        @add-total-comment="post.totalComments += 1"
+        @add-total-comment="(post.totalComments += 1), (post.comment_count += 1)"
       />
     </div>
   </div>
@@ -251,13 +258,36 @@ onUnmounted(() => {
 }
 
 .post-content {
+  font-size: 15px;
   margin-bottom: 12px;
+  white-space: pre-line;
+  line-height: 1.6;
 }
 
-.post-image img {
-  width: 100%;
-  border-radius: 8px;
+.post-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
   margin-bottom: 12px;
+  width: 80%;
+}
+
+.single-image img {
+  width: 50%;
+  border-radius: 8px;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.grid-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .post-actions {

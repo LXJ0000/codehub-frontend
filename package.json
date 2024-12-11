@@ -16,6 +16,7 @@
     "ant-design-vue": "~4.2.5",
     "axios": "^1.7.7",
     "dayjs": "^1.11.13",
+    "emoji-mart-vue-fast": "^15.0.3",
     "jwt-decode": "^4.0.0",
     "lucide-vue-next": "^0.456.0",
     "md5": "^2.3.0",
@@ -25,7 +26,8 @@
     "scss": "^0.2.4",
     "uuid": "^10.0.0",
     "vue": "^3.4.29",
-    "vue-router": "^4.3.3"
+    "vue-router": "^4.3.3",
+    "vue3-emoji-picker": "^1.1.8"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",

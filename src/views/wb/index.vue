@@ -32,7 +32,7 @@ import RightView from './components/rightView.vue'
 }
 
 .content-wrapper {
-  max-width: 1280px;
+  max-width: 1180px;
   margin: 0 auto;
   display: flex;
   gap: 10px;
@@ -40,13 +40,13 @@ import RightView from './components/rightView.vue'
 }
 
 .left-view {
-  width: 188px;
+  width: 200px;
   position: fixed;
 }
 
 .main-content {
   width: 600px;
-  margin-left: 208px; /* 188px + 20px gap */
+  margin-left: 220px; /* 188px + 20px gap */
   min-height: calc(100vh - 60px);
 }
 
@@ -81,8 +81,8 @@ import RightView from './components/rightView.vue'
   }
 }
 
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
   width: 0px;
   height: 5px;
-}
+} */
 </style>

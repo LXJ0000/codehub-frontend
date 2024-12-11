@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useUserStore } from '@/store/modules/user'
 import { message } from 'ant-design-vue'
 import Feed from './FeedView.vue'
@@ -68,6 +68,26 @@ const currentUser = ref({
 })
 
 const posts = ref([])
+let currentPage = 1
+let last = -1
+let hasMorePosts = true
+
+const handleScroll = () => {
+  const st = document.documentElement.scrollTop
+
+  const triggerHeight = window.innerHeight * 0.9 // 1.5 times the viewport height
+  if (st > currentPage * triggerHeight) {
+    if (hasMorePosts) {
+      currentPage++
+      fetchPosts()
+    } else {
+      // 如果鼠标滚动到底部，提示没有更多数据了
+      if (document.documentElement.scrollHeight - document.documentElement.clientHeight === st) {
+        message.info('没有更多了')
+      }
+    }
+  }
+}
 
 // 切换标签事件
 const handleTabSelect = (item) => {
@@ -154,33 +174,28 @@ const fetchUserInfo = async () => {
   }
 }
 
-const pagination = {
-  onChange: (page) => {
-    fetchPosts(page)
-  },
-  pageSize: 10,
-}
 const loading = ref(false)
 
-const fetchPosts = async (page = 1) => {
+const fetchPosts = async () => {
   console.log('log.currentUser:', currentUser.value.id)
 
   loading.value = true
   try {
-    let response = ref()
+    let current = ref()
     if (currentUser.value.id === userStore.user.user_id) {
-      response.value = await api.fetchWriterPosts(page)
+      current.value = await api.fetchWriterPosts(last)
     } else {
-      response.value = await api.fetchPosts(currentUser.value.id, page)
+      current.value = await api.fetchPosts(currentUser.value.id, last)
     }
-    if (response.value.code === 0) {
-      posts.value = response.value.data.post_list.map((item) => ({
+    if (current.value.code === 0) {
+      current.value = current.value.data.post_list.map((item) => ({
         id: item.post.post_id,
         title: item.post.title,
         content: item.post.content,
         abstract: item.post.abstract,
         authorId: item.post.author_id,
         createdAt: new Date(item.post.created_at * 1000).toLocaleString(),
+        created_at: item.post.created_at,
         status: item.post.status,
         liked: item.stat.liked,
         collected: item.stat.collected,
@@ -195,8 +210,16 @@ const fetchPosts = async (page = 1) => {
           : item.post.author.user_name,
         comment_count: item.comment_count,
       }))
-      // 更新分页信息
-      pagination.total = response.value.data.count
+      if (current.value.length < 10) {
+        // default size is 10
+        hasMorePosts = false
+      }
+      if (posts.value && last != -1) {
+        posts.value = [...posts.value, ...current.value]
+      } else {
+        posts.value = [...current.value]
+      }
+      last = current.value[current.value.length - 1].created_at
     }
   } catch (error) {
     console.error('Error fetching posts:', error)
@@ -205,9 +228,20 @@ const fetchPosts = async (page = 1) => {
   }
 }
 
+const removeLast = () => {
+  last = -1
+}
+
 onMounted(async () => {
+  removeLast()
   await fetchUserInfo()
   fetchPosts()
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  removeLast()
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 

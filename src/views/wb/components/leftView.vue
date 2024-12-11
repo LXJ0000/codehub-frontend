@@ -40,7 +40,6 @@ import { FlameIcon, ClockIcon, SearchIcon } from 'lucide-vue-next'
 @import 'tailwindcss/utilities';
 
 .main {
-  width: 188px;
   background: #fff;
   border-radius: 8px;
   height: calc(100vh - 70px);

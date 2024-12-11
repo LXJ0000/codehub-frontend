@@ -66,8 +66,19 @@
               {{ comment.user_profile.nick_name || comment.user_profile.user_name }}
             </span>
           </div>
-          <p :class="{ 'comment-text': true, 'double-line': !comment.isAppend }" ref="commentParagraphs">{{ comment.content }}</p>
-          <a v-if="comment.content.length>60" style="text-decoration: none; color: #69b4ff; font-size: 12px; " href="javascript:void(0)" @click="handleOver(index)">{{comment.isAppend ? '点击收起' : '点击展开'}}</a>
+          <p
+            :class="{ 'comment-text': true, 'double-line': !comment.isAppend }"
+            ref="commentParagraphs"
+          >
+            {{ comment.content }}
+          </p>
+          <a
+            v-if="comment.content.length > 60"
+            style="text-decoration: none; color: #69b4ff; font-size: 12px"
+            href="javascript:void(0)"
+            @click="handleOver(index)"
+            >{{ comment.isAppend ? '点击收起' : '点击展开' }}</a
+          >
           <div class="comment-footer">
             <span class="comment-time">{{ formatTime(comment.created_at) }}</span>
             <div class="comment-actions">

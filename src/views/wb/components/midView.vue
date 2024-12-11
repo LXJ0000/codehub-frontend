@@ -17,12 +17,15 @@ import * as api from '@/services/api'
 import Feed from './FeedView.vue'
 import SubNavView from './SubNavView.vue'
 import PostCreator from './PostCreator.vue'
+import { message } from 'ant-design-vue'
 
 const posts = ref([])
 const showSubNav = ref(true)
 let lastScrollTop = 0
 let currentPage = 1
 let last = -1
+let hasMorePosts = true
+
 const handleScroll = () => {
   const st = document.documentElement.scrollTop
   console.log(st)
@@ -34,9 +37,18 @@ const handleScroll = () => {
     showSubNav.value = true
   }
   lastScrollTop = st <= 0 ? 0 : st
-  if (st > currentPage * 878) {
-    currentPage++
-    fetchPosts()
+
+  const triggerHeight = window.innerHeight * 0.9 // 1.5 times the viewport height
+  if (st > currentPage * triggerHeight) {
+    if (hasMorePosts) {
+      currentPage++
+      fetchPosts()
+    } else {
+      // 如果鼠标滚动到底部，提示没有更多数据了
+      if (document.documentElement.scrollHeight - document.documentElement.clientHeight === st) {
+        message.info('没有更多了')
+      }
+    }
   }
 }
 
@@ -67,7 +79,12 @@ const fetchPosts = async () => {
           'https://avatars.githubusercontent.com/u/98313822?u=b615bc340136ea9f06cec4e05f0aee6b00118f82&v=4',
         authorName: item.post.author.nick_name || item.post.author.user_name,
         comment_count: item.comment_count,
+        images: item.post.images,
       }))
+      if (current.length < 10) {
+        // default size is 10
+        hasMorePosts = false
+      }
       if (posts.value && last != -1) {
         posts.value = [...posts.value, ...current]
       } else {
@@ -88,11 +105,13 @@ const handleDeletePost = (postId) => {
 }
 
 onMounted(() => {
+  removeLast()
   fetchPosts()
   window.addEventListener('scroll', handleScroll)
 })
 
 onUnmounted(() => {
+  removeLast()
   window.removeEventListener('scroll', handleScroll)
 })
 </script>
