@@ -84,13 +84,27 @@ http.interceptors.response.use(
   },
 )
 
+// // 封装请求
+// const request = (url, method, data, type) => {
+//   return http({
+//     url,
+//     method,
+//     [method.toUpperCase() === 'GET' ? 'params' : 'data']: data,
+//     responseType: type,
+//   })
+// }
+
 // 封装请求
 const request = (url, method, data, type) => {
   return http({
     url,
     method,
-    [method.toUpperCase() === 'GET' ? 'params' : 'data']: data,
+    data: method.toUpperCase() === 'GET' ? null : data,
+    params: method.toUpperCase() === 'GET' ? data : null,
     responseType: type,
+    headers: {
+      'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json',
+    },
   })
 }
 

@@ -59,9 +59,13 @@ export const collectPost = (postId, isCollect) => {
   })
 }
 
+// // 发布新动态
+// export const submitPost = (content, title = 'title', status = 'publish', abstract = '') => {
+//   return request('/post', 'POST', { title, content: content, status, abstract })
+// }
 // 发布新动态
-export const submitPost = (content, title = 'title', status = 'publish', abstract = '') => {
-  return request('/post', 'POST', { title, content: content, status, abstract })
+export const submitPost = (formData) => {
+  return request('/post', 'POST', formData)
 }
 
 // 发布新内容（用于模态框提交）

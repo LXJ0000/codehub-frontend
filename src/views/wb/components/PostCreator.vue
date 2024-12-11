@@ -15,6 +15,33 @@
         </div>
       </div>
 
+      <!-- Image Preview Grid -->
+      <div v-if="uploadedImages.length > 0" class="grid grid-cols-6 gap-2 mb-4 w-1/2">
+        <div
+          v-for="(image, index) in uploadedImages"
+          :key="index"
+          class="relative aspect-square col-span-2"
+        >
+          <img
+            :src="image.url"
+            class="w-full h-full object-cover rounded-lg"
+            alt="Uploaded image"
+          />
+          <button
+            @click="removeImage(index)"
+            class="absolute top-1 right-1 bg-black bg-opacity-50 rounded-full p-1 hover:bg-opacity-70"
+          >
+            <XIcon class="w-3 h-3 text-white" />
+          </button>
+        </div>
+        <div
+          class="relative aspect-square col-span-2 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-gray-400"
+          @click="triggerImageUpload"
+        >
+          <PlusIcon class="w-6 h-6 text-gray-400" />
+        </div>
+      </div>
+
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-6">
           <button class="flex items-center text-gray-600 hover:text-gray-800">
@@ -22,7 +49,10 @@
             <span class="ml-1 text-sm">表情</span>
           </button>
 
-          <button class="flex items-center text-gray-600 hover:text-gray-800">
+          <button
+            class="flex items-center text-gray-600 hover:text-gray-800"
+            @click="triggerImageUpload"
+          >
             <ImageIcon class="w-5 h-5" />
             <span class="ml-1 text-sm">图片</span>
           </button>
@@ -72,11 +102,11 @@
           <button
             :class="[
               'px-6 py-1.5 text-white rounded-full transition-colors',
-              postContent
+              postContent || uploadedImages.length > 0
                 ? 'bg-[var(--accent-100)] hover:bg-[var(--accent-200)]'
                 : 'bg-[var(--primary-100)] cursor-not-allowed',
             ]"
-            :disabled="!postContent"
+            :disabled="!postContent && uploadedImages.length === 0"
             @click="sendPost"
           >
             发送
@@ -84,6 +114,14 @@
         </div>
       </div>
     </div>
+    <input
+      type="file"
+      ref="fileInput"
+      class="hidden"
+      accept="image/*"
+      multiple
+      @change="handleImageUpload"
+    />
   </div>
 </template>
 
@@ -96,26 +134,21 @@ import {
   Hash as HashIcon,
   Zap as ZapIcon,
   ChevronDown as ChevronDownIcon,
+  X as XIcon,
+  Plus as PlusIcon,
 } from 'lucide-vue-next'
 import { message } from 'ant-design-vue'
 import * as api from '@/services/api'
-import { defineEmits } from 'vue'
 
-const emit = defineEmits(['fetch-posts']) // 父子组件传递函数示例
-
-const fetchPosts = () => {
-  emit('fetch-posts')
-}
-
-const removeLast = () => {
-  emit('remove-last')
-}
+const emit = defineEmits(['fetch-posts', 'remove-last'])
 
 const postContent = ref('')
 const isDropdownOpen = ref(false)
 const selectedPrivacy = ref('公开')
-const textareaHeight = ref(24) // Initial height (1 line)
-const textarea = ref(null)
+const textareaHeight = ref(24)
+const textarea = ref()
+const fileInput = ref()
+const uploadedImages = ref([])
 
 const privacyOptions = ['公开', '粉丝', '好友圈', '仅自己可见', '群可见']
 
@@ -137,15 +170,52 @@ const adjustTextareaHeight = () => {
   textareaHeight.value = element.scrollHeight
 }
 
+const triggerImageUpload = () => {
+  if (fileInput.value) {
+    fileInput.value.click()
+  }
+}
+
+const handleImageUpload = (event) => {
+  const files = Array.from(event.target.files)
+
+  files.forEach((file) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      uploadedImages.value.push({
+        url: e.target.result,
+        file: file,
+      })
+    }
+    reader.readAsDataURL(file)
+  })
+
+  event.target.value = ''
+}
+
+const removeImage = (index) => {
+  uploadedImages.value.splice(index, 1)
+}
+
 const sendPost = async () => {
-  if (postContent.value) {
+  if (postContent.value || uploadedImages.value.length > 0) {
     try {
-      const response = await api.submitPost(postContent.value)
+      const formData = new FormData()
+      formData.append('title', 'title')
+      formData.append('content', postContent.value)
+      formData.append('status', 'publish')
+      formData.append('abstract', 'abstract')
+      uploadedImages.value.forEach((img) => {
+        formData.append('files', img.file)
+      })
+
+      const response = await api.submitPost(formData)
       if (response.code === 0) {
         message.success('发布成功')
         postContent.value = ''
-        removeLast()
-        fetchPosts()
+        uploadedImages.value = []
+        emit('remove-last')
+        emit('fetch-posts')
       }
     } catch (error) {
       console.error('Error submitting post:', error)
