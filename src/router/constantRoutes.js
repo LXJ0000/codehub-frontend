@@ -19,6 +19,11 @@ export const constantRoutes = [
         component: () => import('@/views/wb/components/userEdit.vue'), // Render this when it's `/wb/u/:userid`
         meta: { title: 'User Profile' },
       },
+      // {
+      //   path: 'rank',
+      //   component: () => import('@/views/wb/components/rankView.vue'),
+      //   meta: { title: 'Rank Page' },
+      // },
     ],
   },
   // {

@@ -87,6 +87,11 @@ export const submitComment = (postId, content) => {
   return request('/comment', 'POST', { biz: 'post', biz_id: postId, content: content })
 }
 
+// 热门榜单
+export const rankList = () => {
+  return request('/post/rank', 'GET')
+}
+
 // 回复一级评论
 export const submitSecondComment = (postId, content, parentId) => {
   return request('/comment', 'POST', {

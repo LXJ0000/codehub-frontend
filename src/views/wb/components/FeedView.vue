@@ -84,7 +84,9 @@ import * as api from '@/services/api'
 import { ref } from 'vue'
 import { ChevronDown } from 'lucide-vue-next'
 import { useUserStore } from '@/store/modules/user'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const emit = defineEmits(['delete-post'])
 const activeDropdown = ref(null)
 const { posts } = defineProps({
@@ -177,9 +179,6 @@ const loadMoreComments = async (post) => {
     message.error('加载更多评论失败')
   }
 }
-
-import { useRouter } from 'vue-router'
-const router = useRouter()
 
 const goToUserProfile = (userId) => {
   router.push(`/wb/u/${userId}`)
