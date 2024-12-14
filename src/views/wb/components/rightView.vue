@@ -1,6 +1,6 @@
 <template>
   <aside class="right-sidebar">
-    <div v-if="isLogin" class="login-card">
+    <!-- <div v-if="isLogin" class="login-card">
       <img
         src="https://tvax1.sinaimg.cn/crop.0.0.1079.1079.180/006UebRdly8hket8gaah4j30tz0tzmz2.jpg?KID=imgbed,tva&Expires=1731430147&ssig=4qtJVzbHnZ"
         alt="登录横幅"
@@ -11,8 +11,8 @@
         还没有悦联？
         <a href="#" class="register-link">立即注册！</a>
       </div>
-    </div>
-    <div v-else class="profile-card">
+    </div> -->
+    <div class="profile-card">
       <div class="avatar" @click="goToUserProfile()">
         <img :src="user.avatar" alt="头像" class="profile-avatar" />
       </div>
@@ -99,7 +99,7 @@ const router = useRouter()
 //     message.error(error.message || '退出登录失败，请重试')
 //   }
 // }
-const isLogin = ref(false)
+// const isLogin = ref(false)
 const user = ref({})
 const hotTopics = ref([
   { title: '杭州一宝马路口连撞多车', count: '57651' },

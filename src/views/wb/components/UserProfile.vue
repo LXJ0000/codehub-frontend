@@ -145,7 +145,6 @@ const fetchUserInfo = async () => {
   const userId = route.params.userid
   try {
     const response = await api.getUserInfo(userId)
-    console.log('log.response:', response)
     if (response.code === 0) {
       currentUser.value.followingCount = response.data.profile.relation_stat.followee
       currentUser.value.followerCount = response.data.profile.relation_stat.follower
@@ -159,7 +158,6 @@ const fetchUserInfo = async () => {
       currentUser.value.email = response.data.profile.email
       currentUser.value.id = response.data.profile.user_id
     }
-    console.log('log.currentUser:', currentUser.value.id)
   } catch (error) {
     console.error('Error fetching user info:', error)
   }
@@ -168,8 +166,6 @@ const fetchUserInfo = async () => {
 const loading = ref(false)
 
 const fetchPosts = async () => {
-  console.log('log.currentUser:', currentUser.value.id)
-
   loading.value = true
   try {
     let current = ref()
