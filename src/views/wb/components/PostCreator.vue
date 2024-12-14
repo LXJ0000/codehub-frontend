@@ -216,7 +216,6 @@ const sendPost = async () => {
       formData.append('title', 'title')
       formData.append('content', postContent.value)
       formData.append('status', 'publish')
-      formData.append('abstract', 'abstract')
       uploadedImages.value.forEach((img) => {
         formData.append('files', img.file)
       })

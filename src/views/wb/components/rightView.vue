@@ -139,7 +139,7 @@ const getUserInfo = async () => {
 }
 
 const goToUserProfile = () => {
-  router.push(`wb/u/${userStore.user.user_id}`)
+  router.push(`/wb/u/${userStore.user.user_id}`)
 }
 
 onMounted(() => {

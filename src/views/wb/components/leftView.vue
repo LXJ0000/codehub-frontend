@@ -4,8 +4,7 @@
       <h2 class="text-xl mb-4">推荐</h2>
 
       <div class="space-y-1">
-        <a
-          href="#"
+        <div
           class="flex items-center text-md hover:bg-gray-50 rounded-lg p-2"
           :class="{ 'text-orange-500': selectedItem === '热门推荐' }"
           @click="selectItem('热门推荐')"
@@ -15,10 +14,9 @@
             :class="{ 'text-orange-500': selectedItem === '热门推荐' }"
           />
           <span>热门推荐</span>
-        </a>
+        </div>
 
-        <a
-          href="#"
+        <div
           class="flex items-center text-md hover:bg-gray-50 rounded-lg p-2"
           :class="{ 'text-orange-500': selectedItem === '热门榜单' }"
           @click="selectItem('热门榜单')"
@@ -28,7 +26,7 @@
             :class="{ 'text-orange-500': selectedItem === '热门榜单' }"
           />
           <span>热门榜单</span>
-        </a>
+        </div>
 
         <div class="space-y-0">
           <div class="flex items-center text-md p-2">
@@ -36,38 +34,34 @@
             <span>微博热搜</span>
           </div>
 
-          <a
-            href="#"
+          <div
             class="block text-sm hover:bg-gray-50 rounded-lg p-2 pl-10 ml-0"
             :class="{ 'text-orange-500': selectedItem === '我的' }"
             @click="selectItem('我的')"
           >
             我的
-          </a>
-          <a
-            href="#"
+          </div>
+          <div
             class="block text-sm hover:bg-gray-50 rounded-lg p-2 pl-10 ml-0"
             :class="{ 'text-orange-500': selectedItem === '热搜' }"
             @click="selectItem('热搜')"
           >
             热搜
-          </a>
-          <a
-            href="#"
+          </div>
+          <div
             class="block text-sm hover:bg-gray-50 rounded-lg p-2 pl-10 ml-0"
             :class="{ 'text-orange-500': selectedItem === '文娱' }"
             @click="selectItem('文娱')"
           >
             文娱
-          </a>
-          <a
-            href="#"
+          </div>
+          <div
             class="block text-sm hover:bg-gray-50 rounded-lg p-2 pl-10 ml-0"
             :class="{ 'text-orange-500': selectedItem === '要闻' }"
             @click="selectItem('要闻')"
           >
             要闻
-          </a>
+          </div>
         </div>
       </div>
     </nav>
@@ -86,17 +80,17 @@ const selectItem = (item) => {
   selectedItem.value = item
   // TODO - route to the corresponding page
   if (item === '热门推荐') {
-    router.push(`/wb`)
+    router.push('/wb')
   } else if (item === '热门榜单') {
-    router.push(`/wb/rank`)
+    router.push('/wb/rank')
   } else if (item === '我的') {
-    router.push(`/wb/me`)
+    router.push('/wb/me')
   } else if (item === '热搜') {
-    router.push(`/wb/hot-search`)
+    router.push('/wb/hot-search')
   } else if (item === '文娱') {
-    router.push(`/wb/entertainment`)
+    router.push('/wb/entertainment')
   } else if (item === '要闻') {
-    router.push(`/wb/news`)
+    router.push('/wb/news')
   }
 }
 </script>

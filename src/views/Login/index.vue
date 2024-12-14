@@ -156,7 +156,7 @@ const onPhoneFinish = async () => {
       })
     }
     message.success('登录成功!')
-    router.push('/dashboard')
+    router.push('/wb')
   } catch (error) {
     message.error(error.message || '登录失败，请重试!')
   } finally {
