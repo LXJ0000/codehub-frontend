@@ -45,7 +45,7 @@ import RightView from './components/rightView.vue'
 }
 
 .main-content {
-  width: 600px;
+  width: 800px;
   margin-left: 220px; /* 188px + 20px gap */
   min-height: calc(100vh - 60px);
 }

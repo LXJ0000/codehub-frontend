@@ -20,12 +20,12 @@ importers:
       axios:
         specifier: ^1.7.7
         version: 1.7.7
-      emoji-mart-vue-fast:
-        specifier: ^15.0.3
-        version: 15.0.3(vue@3.5.8)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
+      emoji-mart-vue-fast:
+        specifier: ^15.0.3
+        version: 15.0.3(vue@3.5.8)
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0

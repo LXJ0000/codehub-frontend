@@ -75,13 +75,15 @@ onMounted(async () => {
       message.error('Failed to fetch rank list: ' + response.msg)
       return
     }
-    posts.value = response.data.posts.map((post) => ({
-      ...post,
-      title: post.abstract,
-      viewCount: Math.floor(Math.random() * 1000000) + 100000, // Simulated view count
-      isHot: Math.random() > 0.5,
-      isNew: Math.random() > 0.7,
-    }))
+    posts.value = response.data.posts
+      .filter((post) => post.abstract !== 'abstract')
+      .map((post) => ({
+        ...post,
+        title: post.abstract,
+        viewCount: Math.floor(Math.random() * 1000000) + 100000, // Simulated view count
+        isHot: Math.random() > 0.5,
+        isNew: Math.random() > 0.7,
+      }))
   } catch (error) {
     message.warn('系统繁忙，请稍后再试')
     console.error('Failed to fetch rank list:', error)

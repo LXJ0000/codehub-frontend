@@ -119,7 +119,7 @@ onUnmounted(() => {
 <style scoped>
 .mid-view {
   width: 100%;
-  max-width: 600px;
+  /* max-width: 600px; */
   margin: 0 auto;
 }
 
