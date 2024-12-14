@@ -13,21 +13,11 @@ import MediaUploadModal from './components/MediaUploadModal.vue'
 import { CbEvents } from '@openim/wasm-client-sdk'
 import { IMSDK } from '@/utils/imCommon'
 import NavView from '@/components/navView.vue'
-// import { LoadingOutlined } from '@ant-design/icons-vue'
-// import { h } from 'vue'
 import { useFriendReqStore } from '@/store/modules/friendReq'
 import * as api from '@/services/api'
 import friendReq from '@/assets/friend_req.png'
 import defaultAvatar from '@/assets/default_avatar.png'
 
-// const indicator = h(LoadingOutlined, {
-//   style: {
-//     fontSize: '24px',
-//     display: 'absolute',
-//     left: '300px',
-//   },
-//   spin: true,
-// })
 const friendReqStore = useFriendReqStore()
 const conversationStore = useConversationStore()
 const messageStore = useMessageStore()
@@ -48,59 +38,6 @@ const isEnd = ref(false) // 判断是否已经加载到最后一条消息
 const isFirst = ref(true)
 const messages = ref([])
 const messageListRef = ref(null)
-
-onMounted(() => {
-  // updateFriendNotification()
-  getConversationList()
-  // getFriendApplicationList()
-  IMSDK.on(CbEvents.OnFriendApplicationAccepted, ({ data }) => {
-    // data 好友申请
-    console.log('log.success.OnFriendApplicationAccepted', data)
-    // getConversationList()
-    // getFriendApplicationList()
-    setTimeout(() => {
-      // friendReqStore.getFriendApplicationList()
-      getFriendApplicationList()
-    }, 500)
-  })
-  IMSDK.on(CbEvents.OnFriendApplicationAdded, ({ data }) => {
-    console.log('log.success.OnFriendApplicationAdded', data)
-
-    setTimeout(() => {
-      // friendReqStore.getFriendApplicationList()
-      getFriendApplicationList()
-    }, 500)
-    // friendNotification.time = new Date().toLocaleDateString()
-    // friendNotification.lastMessage = `${friendReqStore.unResolve}个未处理请求`
-
-    // if (selectedChat.value.id === 'friend-notification') {
-    //   setTimeout(() => {
-    //     getConversationList()
-    //   }, 500)
-    // }
-  })
-  IMSDK.on(CbEvents.OnRecvNewMessages, ({ data }) => {
-    const msg = data[0]
-    if (msg.sendID === selectedChat.value.userID) {
-      messages.value.push({
-        id: messages.value.length + 1,
-        sender: 'other',
-        content: msg.textElem?.content || '',
-        time: msg.sendTime || '',
-        avatar: selectedChat.value.faceURL,
-      })
-    } else {
-      const chat = chats.value.find((item) => item.userID === msg.sendID)
-      chat.unread++
-    }
-    // 使用 nextTick 确保 DOM 更新后滚动到底部
-    nextTick(() => {
-      if (messageListRef.value && isFirst.value) {
-        messageListRef.value.scrollTop = messageListRef.value.scrollHeight
-      }
-    })
-  })
-})
 
 const getConversationList = async () => {
   await conversationStore.getConversationList(isScrollLoad.value)
@@ -239,14 +176,6 @@ const toggleMediaUpload = () => {
   showMediaUpload.value = !showMediaUpload.value
 }
 
-const handleAddMenuClick = ({ key }) => {
-  if (key === 'createGroup') {
-    showCreateGroupModal.value = true
-  } else if (key === 'addFriend') {
-    showAddFriendModal.value = true
-  }
-}
-
 const filteredChats = computed(() => {
   return chats.value.filter((chat) =>
     chat.showName.toLowerCase().includes(searchQuery.value.toLowerCase()),
@@ -337,11 +266,6 @@ const handleFriendRequest = (requestId, action) => {
       acceptFriendApplication(request.userID, '同意添加好友')
       request.status = '已同意'
       message.success('已同意好友请求')
-      // getConversationList()
-      // // 睡眠一段时间，等待好友会话列表更新
-      // setTimeout(() => {
-      //   getConversationList()
-      // }, 1000)
     } else if (action === 'reject') {
       refuseFriendApplication(request.userID, '拒绝添加好友')
       request.status = '已拒绝'
@@ -351,28 +275,104 @@ const handleFriendRequest = (requestId, action) => {
   }
 }
 
+// const onScroll = async (e) => {
+//   if (!e) {
+//     console.error('log.Scroll event is null or undefined')
+//     return
+//   }
+
+//   console.log('log.Scroll event:', e)
+//   console.log('log.Scroll top:', e.target.scrollTop)
+
+//   if (e.target.scrollTop === 0 && !isScrollLoad.value && !isEnd.value) {
+//     isScrollLoad.value = true
+//     try {
+//       await selectChat()
+//     } catch (error) {
+//       console.error('log.Error occurred while selecting chat:', error)
+//     } finally {
+//       isScrollLoad.value = false
+//     }
+//   }
+
+//   if (isEnd.value) {
+//     isScrollLoad.value = false
+//   }
+// }
+
 const onScroll = async (e) => {
-  if (!e) {
-    console.error('log.Scroll event is null or undefined')
-    return
-  }
-
-  console.log('log.Scroll event:', e)
-  console.log('log.Scroll top:', e.target.scrollTop)
-
+  // 如果获取历史消息有问题 切回上一个版本
   if (e.target.scrollTop === 0 && !isScrollLoad.value && !isEnd.value) {
     isScrollLoad.value = true
     try {
       await selectChat()
     } catch (error) {
-      console.error('log.Error occurred while selecting chat:', error)
+      console.error('Error occurred while selecting chat:', error)
     } finally {
       isScrollLoad.value = false
     }
   }
+}
 
-  if (isEnd.value) {
-    isScrollLoad.value = false
+onMounted(() => {
+  getConversationList()
+  IMSDK.on(CbEvents.OnFriendApplicationAccepted, ({ data }) => {
+    console.log('log.success.OnFriendApplicationAccepted', data)
+    setTimeout(getFriendApplicationList, 500)
+  })
+  IMSDK.on(CbEvents.OnFriendApplicationAdded, ({ data }) => {
+    console.log('log.success.OnFriendApplicationAdded', data)
+    setTimeout(getFriendApplicationList, 500)
+  })
+  // IMSDK.on(CbEvents.OnRecvNewMessages, ({ data }) => {
+  //   const msg = data[0]
+  //   if (msg.sendID === selectedChat.value.userID) {
+  //     messages.value.push({
+  //       id: messages.value.length + 1,
+  //       sender: 'other',
+  //       content: msg.textElem?.content || '',
+  //       time: msg.sendTime || '',
+  //       avatar: selectedChat.value.faceURL,
+  //     })
+  //   } else {
+  //     const chat = chats.value.find((item) => item.userID === msg.sendID)
+  //     chat.unread++
+  //   }
+  //   // 使用 nextTick 确保 DOM 更新后滚动到底部
+  //   nextTick(() => {
+  //     if (messageListRef.value && isFirst.value) {
+  //       messageListRef.value.scrollTop = messageListRef.value.scrollHeight
+  //     }
+  //   })
+  // })
+  IMSDK.on(CbEvents.OnRecvNewMessages, ({ data }) => {
+    // 如果接受信息有问题 切回上面的版本
+    const msg = data[0]
+    if (msg.sendID === selectedChat.value?.userID) {
+      messages.value.push({
+        id: messages.value.length + 1,
+        sender: 'other',
+        content: msg.textElem?.content || '',
+        time: msg.sendTime || '',
+        avatar: selectedChat.value.faceURL,
+      })
+      nextTick(() => {
+        if (messageListRef.value && isFirst.value) {
+          messageListRef.value.scrollTop = messageListRef.value.scrollHeight
+        }
+      })
+    } else {
+      const chat = chats.value.find((item) => item.userID === msg.sendID)
+      if (chat) chat.unread++
+    }
+  })
+})
+
+const handleAddMenuClick = ({ key }) => {
+  if (key === 'createGroup') {
+    showCreateGroupModal.value = true
+  } else if (key === 'addFriend') {
+    showAddFriendModal.value = true
   }
 }
 </script>
@@ -504,7 +504,9 @@ const onScroll = async (e) => {
                 <a-avatar v-if="msg.sender === 'other'" :src="msg.avatar" class="message-avatar" />
                 <div class="message-bubble">
                   <div :class="['message-content', msg.sender]">{{ msg.content }}</div>
-                  <div class="message-time">{{ new Date(msg.time).toLocaleString() }}</div>
+                  <div :class="['message-time', msg.sender]">
+                    {{ new Date(msg.time).toLocaleString() }}
+                  </div>
                 </div>
                 <a-avatar v-if="msg.sender === 'user'" :src="msg.avatar" class="message-avatar" />
               </div>
@@ -714,10 +716,18 @@ const onScroll = async (e) => {
   color: white;
 }
 
-.message-time {
+.message-time.user {
   font-size: 12px;
   color: #8c8c8c;
   margin-top: 4px;
+  align-self: flex-end;
+}
+
+.message-time.other {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 4px;
+  align-self: flex-start;
 }
 
 .message-input {
