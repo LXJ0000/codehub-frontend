@@ -31,6 +31,11 @@ export const batchGetUserInfo = (userIds) => {
   return request('/user.batch', 'POST', { user_ids: userIds })
 }
 
+// 用户头像上传
+export const uploadAvatar = (formData) => {
+  return request('/user/avatar', 'POST', formData)
+}
+
 // === 帖子相关接口 ===
 
 // 获取用户动态列表

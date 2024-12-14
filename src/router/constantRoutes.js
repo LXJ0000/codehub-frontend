@@ -15,7 +15,7 @@ export const constantRoutes = [
         meta: { title: 'User Profile' },
       },
       {
-        path: 'edit/:userid', // Dynamic route for user profile
+        path: 'edit', // Default route for `/wb/edit`
         component: () => import('@/views/wb/components/userEdit.vue'), // Render this when it's `/wb/edit/:userid`
         meta: { title: 'User Profile' },
       },

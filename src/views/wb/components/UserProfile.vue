@@ -7,9 +7,6 @@
         :before-upload="beforeUpload"
         @change="handleChange"
         :customRequest="customRequest"
-        method="post"
-        action="http://localhost:8080/api/user/avatar"
-        :headers="headers"
       >
         <img :src="currentUser.avatar" alt="User Avatar" class="profile-avatar" />
       </a-upload>
@@ -53,11 +50,7 @@ import * as api from '@/services/api'
 // 选择的标签
 const selectedTab = ref('weibo')
 
-// 用户数据和请求头
 const userStore = useUserStore()
-const headers = {
-  authorization: 'Bearer ' + userStore.user.access_token,
-}
 const currentUser = ref({
   id: '',
   avatar: '',
@@ -71,6 +64,7 @@ const posts = ref([])
 let currentPage = 1
 let last = -1
 let hasMorePosts = true
+let isOwnProfile = false
 
 const handleScroll = () => {
   const st = document.documentElement.scrollTop
@@ -96,6 +90,10 @@ const handleTabSelect = (item) => {
 
 // 上传文件校验
 const beforeUpload = (file) => {
+  if (!isOwnProfile) {
+    message.error('只能上传自己的头像！')
+    return false
+  }
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
   if (!isJpgOrPng) {
     message.error('只能上传 JPG/PNG 格式的文件！')
@@ -113,21 +111,14 @@ const customRequest = async ({ file, onSuccess, onError }) => {
   formData.append('avatar', file)
 
   try {
-    const response = await fetch('http://localhost:8080/api/user/avatar', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + userStore.accessToken,
-      },
-      body: formData,
-    })
-
-    const data = await response.json()
-
-    if (data.code === 0) {
-      userStore.user.avatar = data.data.path
-      onSuccess(data)
+    const response = await api.uploadAvatar(formData)
+    console.log('log.response:', response)
+    if (response.code === 0) {
+      userStore.user.avatar = response.data.path
+      currentUser.value.avatar = response.data.path
+      onSuccess(response)
     } else {
-      onError(new Error(data.message))
+      onError(new Error(response.message))
     }
   } catch (error) {
     onError(error)
@@ -237,6 +228,9 @@ onMounted(async () => {
   await fetchUserInfo()
   fetchPosts()
   window.addEventListener('scroll', handleScroll)
+  if (currentUser.value.id === userStore.user.user_id) {
+    isOwnProfile = true
+  }
 })
 
 onUnmounted(() => {
@@ -286,10 +280,4 @@ onUnmounted(() => {
   border-radius: 8px;
   margin-bottom: 20px;
 }
-
-/* .profile-content {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 20px;
-} */
 </style>

@@ -7,18 +7,11 @@
         :before-upload="beforeUpload"
         @change="handleChange"
         :customRequest="customRequest"
-        method="post"
-        action="http://localhost:8080/api/user/avatar"
-        :headers="headers"
       >
-        <img :src="currentUser.avatar" alt="User Avatar" class="profile-avatar" />
+        <img :src="userStore.user.avatar" alt="User Avatar" class="profile-avatar" />
       </a-upload>
-      <!-- <h1>{{ currentUser.username }}</h1> -->
-      <p>{{ currentUser.bio }}</p>
+      <p>{{ userStore.user.bio }}</p>
       <div class="user-stats">
-        <!-- <span>关注 {{ currentUser.following }}</span>
-        <span>粉丝 {{ currentUser.followers }}</span>
-        <span>文章 {{ currentUser.posts }}</span> -->
         <a-form
           :model="form"
           name="basic"
@@ -48,30 +41,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useUserStore } from '@/store/modules/user'
 import { message } from 'ant-design-vue'
 import * as api from '@/services/api'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
+
 dayjs.locale('zh-cn')
-// 选择的标签
 
-// 用户数据和请求头
 const userStore = useUserStore()
-const headers = {
-  authorization: 'Bearer ' + userStore.user.access_token,
-}
-const currentUser = ref({
-  id: '',
-  avatar: '',
-  name: '',
-  followingCount: 0,
-  followerCount: 0,
-  postCount: 0,
-})
 
-const posts = ref([])
 const form = ref({})
 // 上传文件校验
 const beforeUpload = (file) => {
@@ -92,21 +72,13 @@ const customRequest = async ({ file, onSuccess, onError }) => {
   formData.append('avatar', file)
 
   try {
-    const response = await fetch('http://localhost:8080/api/user/avatar', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + userStore.accessToken,
-      },
-      body: formData,
-    })
-
-    const data = await response.json()
-
-    if (data.code === 0) {
-      userStore.user.avatar = data.data.path
-      onSuccess(data)
+    const response = await api.uploadAvatar(formData)
+    console.log('log.response:', response)
+    if (response.code === 0) {
+      userStore.user.avatar = response.data.path
+      onSuccess(response)
     } else {
-      onError(new Error(data.message))
+      onError(new Error(response.message))
     }
   } catch (error) {
     onError(error)
@@ -124,21 +96,15 @@ const handleChange = (info) => {
     message.error('请稍后重试')
   }
 }
-import { useRoute } from 'vue-router'
-
-const route = useRoute()
 
 const fetchUserInfo = async () => {
-  // 获取路由的用户 ID /wb/u/:userId
-  const userId = route.params.userid
   try {
-    const response = await api.getUserInfo(userId)
+    const response = await api.fetchUserInfo()
     console.log('log.response:', response)
     if (response.code === 0) {
       form.value.nick_name = response.data.profile.nick_name
         ? response.data.profile.nick_name
         : response.data.profile.user_name
-      currentUser.value.avatar = response.data.profile.avatar
       form.value.birthday = dayjs(response.data.profile.birthday)
       form.value.about_me = response.data.profile.about_me
     }
@@ -158,65 +124,13 @@ const editUserInfo = async () => {
       message.success('修改成功')
       fetchUserInfo()
     }
-    console.log('log.currentUser:', currentUser.value.id)
   } catch (error) {
     console.error('Error fetching user info:', error)
   }
 }
-const pagination = {
-  onChange: (page) => {
-    fetchPosts(page)
-  },
-  pageSize: 10,
-}
-const loading = ref(false)
 
-const fetchPosts = async (page = 1) => {
-  console.log('log.currentUser:', currentUser.value.id)
-
-  loading.value = true
-  try {
-    let response = ref()
-    if (currentUser.value.id === userStore.user.user_id) {
-      response.value = await api.fetchWriterPosts(page)
-    } else {
-      response.value = await api.fetchPosts(currentUser.value.id, page)
-    }
-    if (response.value.code === 0) {
-      posts.value = response.value.data.post_list.map((item) => ({
-        id: item.post.post_id,
-        title: item.post.title,
-        content: item.post.content,
-        abstract: item.post.abstract,
-        authorId: item.post.author_id,
-        createdAt: new Date(item.post.created_at * 1000).toLocaleString(),
-        status: item.post.status,
-        liked: item.stat.liked,
-        collected: item.stat.collected,
-        likeCount: item.interaction.like_cnt,
-        collectCount: item.interaction.collect_cnt,
-        readCount: item.interaction.read_cnt,
-        authorAvatar: item.post.author.avatar
-          ? item.post.author.avatar
-          : 'https://avatars.githubusercontent.com/u/98313822?u=b615bc340136ea9f06cec4e05f0aee6b00118f82&v=4', // 你可能需要从其他地方获取作者头像
-        authorName: item.post.author.nick_name
-          ? item.post.author.nick_name
-          : item.post.author.user_name,
-        comment_count: item.comment_count,
-      }))
-      // 更新分页信息
-      pagination.total = response.value.data.count
-    }
-  } catch (error) {
-    console.error('Error fetching posts:', error)
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(async () => {
-  await fetchUserInfo()
-  fetchPosts()
+onMounted(() => {
+  fetchUserInfo()
 })
 </script>
 
