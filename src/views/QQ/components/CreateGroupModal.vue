@@ -2,9 +2,9 @@
 import { reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 
-// const props = defineProps({
-//   open: Boolean,
-// })
+defineProps({
+  open: Boolean,
+})
 
 const emit = defineEmits(['update:open'])
 

@@ -5,9 +5,9 @@ import { SearchOutlined } from '@ant-design/icons-vue'
 import { IMSDK } from '@/utils/imCommon'
 import { userSearch } from '@/services/login'
 
-// const props = defineProps({
-//   open: Boolean,
-// })
+defineProps({
+  open: Boolean,
+})
 
 const emit = defineEmits(['update:open'])
 
