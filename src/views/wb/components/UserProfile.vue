@@ -50,7 +50,7 @@
               >
                 <button
                   v-if="currentUser.id !== userStore.user.user_id"
-                  @click="currentUser.inFollow ? unfollowUser() : followUser()"
+                  @click="currentUser.inFollow !== 0 ? unfollowUser() : followUser()"
                   class="px-4 py-1.5 rounded-full bg-gray-100 text-gray-900"
                 >
                   {{ getFollowButtonText }}
@@ -152,7 +152,9 @@
               <Award class="h-4 w-4" />
               {{ currentUser.creditScore }}
             </p>
-            <p v-if="currentUser.friendInfo">{{ currentUser.friendInfo }}</p>
+            <p v-if="currentUser.friendInfo && currentUser.id !== userStore.user.user_id">
+              {{ currentUser.friendInfo }}
+            </p>
           </div>
         </div>
       </div>
@@ -196,6 +198,10 @@ import {
   HelpCircle,
   Award,
 } from 'lucide-vue-next'
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
+
+dayjs.locale('zh-cn')
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -210,7 +216,7 @@ const currentUser = ref({
   name: '',
   followingCount: 0,
   followerCount: 0,
-  inFollow: false,
+  inFollow: 0,
   postCount: 0,
   about_me: '',
   ipLocation: '',
@@ -230,10 +236,15 @@ let hasMorePosts = true
 let isOwnProfile = false
 
 const getFollowButtonText = computed(() => {
-  if (currentUser.value.inFollow) {
-    return '互相关注'
-  } else {
-    return '关注'
+  switch (currentUser.value.inFollow) {
+    case 0:
+      return '关注'
+    case 1:
+      return '已关注'
+    case 2:
+      return '互相关注'
+    default:
+      return '关注'
   }
 })
 
@@ -254,8 +265,7 @@ const followUser = async () => {
   try {
     const response = await api.followUser(currentUser.value.id)
     if (response.code === 0) {
-      currentUser.value.inFollow = true
-      currentUser.value.followerCount++
+      fetchUserInfo()
     }
   } catch (error) {
     console.error('Error following user:', error)
@@ -266,8 +276,7 @@ const unfollowUser = async () => {
   try {
     const response = await api.unfollowUser(currentUser.value.id)
     if (response.code === 0) {
-      currentUser.value.inFollow = false
-      currentUser.value.followerCount--
+      fetchUserInfo()
     }
   } catch (error) {
     console.error('Error unfollowing user:', error)
@@ -356,6 +365,23 @@ const handleChange = (info) => {
   }
 }
 
+const getZodiacSign = (date) => {
+  const month = date.month() + 1
+  const day = date.date()
+  if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return '水瓶座'
+  if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return '双鱼座'
+  if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return '白羊座'
+  if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return '金牛座'
+  if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return '双子座'
+  if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return '巨蟹座'
+  if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return '狮子座'
+  if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return '处女座'
+  if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return '天秤座'
+  if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return '天蝎座'
+  if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return '射手座'
+  if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return '摩羯座'
+}
+
 const fetchUserInfo = async () => {
   // 获取路由的用户 ID /wb/u/:userId
   const userId = route.params.userid
@@ -363,23 +389,25 @@ const fetchUserInfo = async () => {
     const response = await api.getUserInfo(userId)
     if (response.code === 0) {
       const profile = response.data.profile
+      const birthday = dayjs(profile.birthday)
+
       currentUser.value = {
         id: profile.user_id,
         avatar: profile.avatar,
         name: profile.nick_name || profile.user_name,
         followingCount: profile.relation_stat.followee,
         followerCount: profile.relation_stat.follower,
-        inFollow: profile.relation_stat.in_follow,
+        inFollow: profile.relation_stat.follow_status,
         postCount: profile.post_cnt,
         about_me: profile.about_me,
         ipLocation: 'IP属地', // This should come from API
         videoPlayCount: profile.video_play_count || 0,
         interactionCount: profile.interaction_count || 0,
-        birthday: profile.birthday,
-        zodiac: '狮子座', // This should come from API
-        joinDate: '2018-08-28', // This should come from API
+        birthday: birthday.format('YYYY-MM-DD'),
+        zodiac: getZodiacSign(birthday),
+        joinDate: dayjs(profile.created_at).format('YYYY-MM-DD'), // This should come from API
         creditScore: '信用较好',
-        friendInfo: `她有 1 个好友，你们已经互相关注${profile.mutual_follow_days || 0}天了`,
+        friendInfo: `你们已经互相关注 ${profile.mutual_follow_days || 7} 天了`,
       }
     }
   } catch (error) {
