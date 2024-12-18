@@ -45,13 +45,13 @@ import RightView from './components/rightView.vue'
 }
 
 .main-content {
-  width: 800px;
+  width: 900px;
   margin-left: 220px; /* 188px + 20px gap */
   min-height: calc(100vh - 60px);
 }
 
 .right-view {
-  width: 300px;
+  width: 400px;
 }
 
 /* Hide right sidebar first */
