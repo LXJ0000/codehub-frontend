@@ -10,12 +10,12 @@
       >
         <img :src="currentUser.avatar" alt="User Avatar" class="profile-avatar" />
       </a-upload>
-      <h1>{{ currentUser.username }}</h1>
-      <p>{{ currentUser.bio }}</p>
+      <h2>{{ currentUser.name }}</h2>
+      <p>{{ currentUser.about_me }}</p>
       <div class="user-stats">
-        <span>关注 {{ currentUser.following }}</span>
-        <span>粉丝 {{ currentUser.followers }}</span>
-        <span>文章 {{ currentUser.posts }}</span>
+        <span>关注 {{ currentUser.followingCount }}</span>
+        <span>粉丝 {{ currentUser.followerCount }}</span>
+        <span>文章 {{ currentUser.postCount }}</span>
       </div>
     </div>
     <nav class="profile-nav">
@@ -57,6 +57,7 @@ const currentUser = ref({
   name: '',
   followingCount: 0,
   followerCount: 0,
+  inFollow: false,
   postCount: 0,
 })
 
@@ -65,6 +66,30 @@ let currentPage = 1
 let last = -1
 let hasMorePosts = true
 let isOwnProfile = false
+
+const followUser = async () => {
+  try {
+    const response = await api.followUser(currentUser.value.id)
+    if (response.code === 0) {
+      currentUser.value.inFollow = true
+      currentUser.value.followerCount++
+    }
+  } catch (error) {
+    console.error('Error following user:', error)
+  }
+}
+
+const unfollowUser = async () => {
+  try {
+    const response = await api.unfollowUser(currentUser.value.id)
+    if (response.code === 0) {
+      currentUser.value.inFollow = false
+      currentUser.value.followerCount--
+    }
+  } catch (error) {
+    console.error('Error unfollowing user:', error)
+  }
+}
 
 const handleScroll = () => {
   const st = document.documentElement.scrollTop
@@ -148,6 +173,7 @@ const fetchUserInfo = async () => {
     if (response.code === 0) {
       currentUser.value.followingCount = response.data.profile.relation_stat.followee
       currentUser.value.followerCount = response.data.profile.relation_stat.follower
+      currentUser.value.inFollow = response.data.profile.relation_stat.in_follow
       currentUser.value.postCount = response.data.profile.post_cnt
       currentUser.value.name = response.data.profile.nick_name
         ? response.data.profile.nick_name
@@ -158,6 +184,7 @@ const fetchUserInfo = async () => {
       currentUser.value.email = response.data.profile.email
       currentUser.value.id = response.data.profile.user_id
     }
+    console.log('log.currentUser:', currentUser.value)
   } catch (error) {
     console.error('Error fetching user info:', error)
   }

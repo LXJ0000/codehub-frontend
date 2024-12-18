@@ -142,3 +142,13 @@ export const likeComment = (commentId, isLike) => {
     is_like: isLike,
   })
 }
+
+// 关注用户
+export const followUser = (userId) => {
+  return request('/relation/follow', 'POST', { followee: userId })
+}
+
+// 取消关注用户
+export const unfollowUser = (userId) => {
+  return request('/relation/cancel_follow', 'POST', { followee: userId })
+}
